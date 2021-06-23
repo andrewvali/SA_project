@@ -6,7 +6,7 @@ from PIL import Image, ImageTk
 from queries import EventForShip, InterdictionArea, ProtectedArea, TrajectoryAndGap
 import tkinter.font as font
 
-
+#test
 class gui():
     def __init__(self):
         self.flag = False
