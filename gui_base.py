@@ -3,7 +3,7 @@ from tkinter import ttk
 
 import cv2
 from PIL import Image, ImageTk
-from queries import EventForShip, InterdictionArea, ProtectedArea, TrajectoryAndGap
+from queries import EventForShip, InterdictionArea, ProtectedArea, TrajectoryAndGap, CustomQuery
 import tkinter.font as font
 
 
@@ -53,7 +53,37 @@ class gui():
         self.root.mainloop()
 
     def expert_mode(self):
-        print("TO DO")
+
+
+        self.gui = Tk()
+        self.gui.geometry('700x500')
+        self.gui.title("Query editor")
+        scrollbar = Scrollbar(self.gui, orient=VERTICAL)
+        scrollbar.pack(side="right", fill='y')
+        self.text = Text(self.gui, yscrollcommand=scrollbar.set)
+
+        prefixes = "@prefix geof: <http://www.opengis.net/def/function/geosparql/> .\n"
+        prefixes += "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n"
+        prefixes += "@prefix strdf: <http://strdf.di.uoa.gr/ontology#> .\n@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n"
+        prefixes += "@prefix ogc: <http://www.opengis.net/ont/geosparql#> .\n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n"
+        prefixes += "@prefix : <http://www.datacron-project.eu/ais_dataset#> .\n@prefix unit: <http://www.datacron-project.eu/unit#> ."
+        prefixes += "\n\nSELECT COUNT(*) WHERE {?s ?p ?o}"
+
+        self.text.insert("end", prefixes)
+        close = Button(self.gui, text="Back", command=self.gui.destroy)
+        close.pack(fill='x', pady=5, side=BOTTOM, ipadx=28)
+
+        run = Button(self.gui, text="Run", command=self.custom_query)
+        run.pack(fill='x', pady=5, side=BOTTOM, ipadx=28)
+
+        self.text.pack(side="left", fill="y")
+
+        scrollbar.config(command=self.text.yview)
+        self.gui.mainloop()
+
+    def custom_query(self):
+        CustomQuery(self.text.get("1.0", "end-1c"))
+
 
     def analysis(self):
         self.choice = str(self.choice_cb.get())

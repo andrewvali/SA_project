@@ -9,7 +9,50 @@ from PIL import Image, ImageTk
 from math import *
 
 # IP SERVER
-IP_PORT = "79.35.17.201:8890"
+IP_PORT = "localhost:8890"
+
+class CustomQuery():
+    def __init__(self,query):
+        self.query= query
+        self.run_query()
+
+    def run_query(self):
+
+        sparql = SPARQLWrapper("http://" + IP_PORT + "/sparql/")
+        sparql.setQuery(self.query)
+        sparql.setReturnFormat(JSON)
+        result = sparql.query().convert()
+        triples = result["results"]["bindings"]
+        t = result["head"]["vars"]
+        self.res = ""
+        for triple in triples:
+            msg = ""
+            for i in t:
+                msg += " " + str(triple[i]["value"]).split("/")[-1].split("#")[-1]
+            self.res += msg + "\n"
+
+        self.gui_result()
+
+
+    def gui_result(self):
+        self.gui = Tk()
+        # self.gui.geometry('700x500')
+        self.gui.title("Results of query ")
+        scrollbar = Scrollbar(self.gui, orient=VERTICAL)
+        scrollbar.pack(side="right", fill='y')
+        text = Text(self.gui, yscrollcommand=scrollbar.set)
+        text.insert("end", self.res)
+        text.pack(side="left", fill="y")
+
+        scrollbar.config(command=text.yview)
+        self.gui.mainloop()
+
+
+
+
+
+
+
 
 class EventForShip():
     def __init__(self,event,vessel):
