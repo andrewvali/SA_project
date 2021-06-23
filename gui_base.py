@@ -15,7 +15,7 @@ class gui():
     def initialize(self):
 
         self.root = Tk()
-        self.root.geometry("600x400")
+        self.root.geometry("600x500")
 
         self.root.title("Knowledge Base")
 
@@ -45,11 +45,21 @@ class gui():
         self.canvas.create_image(0, 0, image=photo, anchor=NW)
         print(self.flag)
 
+        self.expert = Button(text="Expert", command=self.expert_mode, bg="blue", fg="white", font=font.BOLD)
+        self.expert.pack(fill='x',padx = 20, pady=30, side=RIGHT, ipadx=28)
+
+
+
         self.root.mainloop()
+
+    def expert_mode(self):
+        print("TO DO")
 
     def analysis(self):
         self.choice = str(self.choice_cb.get())
         self.canvas.destroy()
+        self.query.destroy()
+        self.expert.destroy()
         if self.choice == "Event for ship":
             self.analysis_event_for_ship()
         elif self.choice=='Interdiction Fishing Area':
