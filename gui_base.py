@@ -229,12 +229,12 @@ class gui():
             scrollbar = Scrollbar(query_window, orient=VERTICAL)
             scrollbar.pack(side="right", fill='y')
             text = Text(query_window, yscrollcommand=scrollbar.set)
-            text.insert("end", PROTECTED_AREA_QUERY)
+            text.insert("end", PROTECTED_AREA_CONSTRUCT + PROTECTED_AREA_QUERY)
         elif self.choice=='Trajectory with Gap':
             scrollbar = Scrollbar(query_window, orient=VERTICAL)
             scrollbar.pack(side="right", fill='y')
             text = Text(query_window, yscrollcommand=scrollbar.set)
-            text.insert("end", TRAJ_GAP_QUERY)
+            text.insert("end", TRAJ_GAP_QUERY_1+TRAJ_GAP_QUERY_2)
 
         text.tag_config("explaination", foreground="blue")
         #text.tag_config("prefix", foreground="orange")

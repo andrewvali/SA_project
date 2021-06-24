@@ -19,7 +19,7 @@ FILTER(?event = [EVENT] && ?vessel = [VESSEL])
 ORDER BY DESC(?num_event)"""
 
 
-TRAJ_GAP_QUERY = """
+TRAJ_GAP_QUERY_1 = """
 # EXPLAINATION: RETURNS ALL PORT'S POINTS 
 
 @prefix geof: <http://www.opengis.net/def/function/geosparql/> .
@@ -40,8 +40,10 @@ WHERE{
 ?geom1 ogc:asWKT ?port_point
 FILTER (?instance_port = :Port || ?instance_port = :FishingPort).
 }
+"""
 
-# EXPLAINATION: RETURNS TRAJECTORY POINT OF A SPECIFIC VESSEL
+
+TRAJ_GAP_QUERY_2 = """# EXPLAINATION: RETURNS TRAJECTORY POINT OF A SPECIFIC VESSEL
 
 @prefix geof: <http://www.opengis.net/def/function/geosparql/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -63,10 +65,10 @@ WHERE{
 FILTER (?vessel = [VESSEL]).
 }
 ORDER BY ASC(?time)
-LIMIT 500"""
+LIMIT 500
+"""
 
-QUERY_INTERDICTION_AREA = """
-# EXPLAINATION: RETURNS VESSEL STOPPED IN AN INTERDICTION FISHING AREA
+QUERY_INTERDICTION_AREA = """# EXPLAINATION: RETURNS VESSEL STOPPED IN AN INTERDICTION FISHING AREA
 
 @prefix geof: <http://www.opengis.net/def/function/geosparql/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -97,8 +99,8 @@ WHERE{
 FILTER (geof:sfWithin(?point, ?zone) && ?vessel = [VESSEL])
 } LIMIT 10"""
 
-PROTECTED_AREA_QUERY = """
-# EXPLAINATION: CREATES A NEW TRIPLE COMPOSED BY VESSEL-EVENT-DATE DETECTED IN A PROTECTED AREA
+
+PROTECTED_AREA_CONSTRUCT ="""# EXPLAINATION: CREATES A NEW TRIPLE COMPOSED BY VESSEL-EVENT-DATE DETECTED IN A PROTECTED AREA
 
 @prefix geof: <http://www.opengis.net/def/function/geosparql/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -128,6 +130,10 @@ WHERE {
 FILTER(geof:sfWithin(?point ,?zone ) && ?area = [AREA])
 }
 } LIMIT 10
+"""
+
+
+PROTECTED_AREA_QUERY = """
 
 # EXPLAINATION: RETURNS VESSEL-EVENT-DATE OF NEW DATASET FROM CONSTRUCT
 
