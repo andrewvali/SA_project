@@ -9,7 +9,7 @@ from PIL import Image, ImageTk
 from math import *
 
 # IP SERVER
-IP_PORT = "localhost:8890"
+IP_PORT = "79.35.17.201:8890"
 
 class CustomQuery():
     def __init__(self,query):
@@ -49,11 +49,6 @@ class CustomQuery():
 
 
 
-
-
-
-
-
 class EventForShip():
     def __init__(self,event,vessel):
         self.event = str(event)
@@ -68,23 +63,22 @@ class EventForShip():
                 ves = ":" + self.vessel
             sparql = SPARQLWrapper("http://"+IP_PORT+"/sparql/")
             self.query =  """
-                @prefix geof: <http://www.opengis.net/def/function/geosparql/> .
-                @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-                @prefix strdf: <http://strdf.di.uoa.gr/ontology#> .
-                @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-                @prefix ogc: <http://www.opengis.net/ont/geosparql#> .
-                @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-                @prefix : <http://www.datacron-project.eu/ais_dataset#> .
-                @prefix unit: <http://www.datacron-project.eu/unit#> .
-    
-                SELECT DISTINCT ?vessel ?event (COUNT(?event) as ?num_event)
-                WHERE{
-                ?event :occurs ?node.
-                ?node :ofMovingObject ?vessel
-                FILTER(?event = :""" + self.event + """ && ?vessel = """ + ves + """)
-                }GROUP BY ?vessel ?event HAVING(COUNT(?event)>2)
-                ORDER BY DESC(?num_event)            
-                """
+@prefix geof: <http://www.opengis.net/def/function/geosparql/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix strdf: <http://strdf.di.uoa.gr/ontology#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ogc: <http://www.opengis.net/ont/geosparql#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix : <http://www.datacron-project.eu/ais_dataset#> .
+@prefix unit: <http://www.datacron-project.eu/unit#> .
+
+SELECT DISTINCT ?vessel ?event (COUNT(?event) as ?num_event)
+WHERE{
+?event :occurs ?node.
+?node :ofMovingObject ?vessel
+FILTER(?event = :""" + self.event + """ && ?vessel = """ + ves + """)
+}GROUP BY ?vessel ?event HAVING(COUNT(?event)>2)
+ORDER BY DESC(?num_event)"""
             sparql.setQuery(self.query)
 
             sparql.setReturnFormat(JSON)
@@ -148,36 +142,34 @@ class InterdictionArea():
             sparql = SPARQLWrapper("http://"+IP_PORT+"/sparql/")
             #sparql.setTimeout(30)
             self.query = """
-                @prefix geof: <http://www.opengis.net/def/function/geosparql/> .
-                @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-                @prefix strdf: <http://strdf.di.uoa.gr/ontology#> .
-                @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-                @prefix ogc: <http://www.opengis.net/ont/geosparql#> .
-                @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-                @prefix : <http://www.datacron-project.eu/ais_dataset#> .
-                @prefix unit: <http://www.datacron-project.eu/unit#> .
-                                
-                SELECT DISTINCT ?vessel ?tstart ?point
-                WHERE{
+@prefix geof: <http://www.opengis.net/def/function/geosparql/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix strdf: <http://strdf.di.uoa.gr/ontology#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ogc: <http://www.opengis.net/ont/geosparql#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix : <http://www.datacron-project.eu/ais_dataset#> .
+@prefix unit: <http://www.datacron-project.eu/unit#> .
                 
-                ?area a :Fishing_Interdiction_area.
-                
-                :StoppedInit :occurs ?obj.
-                ?obj :ofMovingObject ?vessel.
-                ?obj :hasTemporalFeature ?timestamp_start.
-                ?timestamp_start :TimeStart ?tstart.
-                
-                ?area :hasGeometry ?geom2 .
-                ?geom2 ogc:asWKT ?zone .
-                
-                ?obj :hasGeometry ?geom .
-                ?geom ogc:asWKT ?point .
-                
-                
-                FILTER (geof:sfWithin(?point, ?zone) && ?vessel = """+ves+""")
-                } LIMIT 10
+SELECT DISTINCT ?vessel ?tstart ?point
+WHERE{
 
-                """
+?area a :Fishing_Interdiction_area.
+
+:StoppedInit :occurs ?obj.
+?obj :ofMovingObject ?vessel.
+?obj :hasTemporalFeature ?timestamp_start.
+?timestamp_start :TimeStart ?tstart.
+
+?area :hasGeometry ?geom2 .
+?geom2 ogc:asWKT ?zone .
+
+?obj :hasGeometry ?geom .
+?geom ogc:asWKT ?point .
+
+
+FILTER (geof:sfWithin(?point, ?zone) && ?vessel = """+ves+""")
+} LIMIT 10"""
             sparql.setQuery(self.query)
 
             sparql.setReturnFormat(JSON)
@@ -251,34 +243,33 @@ class ProtectedArea():
                 eve = ":" + self.event
             sparql = SPARQLWrapper("http://" + IP_PORT + "/sparql/")
             self.query_construct = """
-            @prefix geof: <http://www.opengis.net/def/function/geosparql/> .
-            @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-            @prefix strdf: <http://strdf.di.uoa.gr/ontology#> .
-            @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-            @prefix ogc: <http://www.opengis.net/ont/geosparql#> .
-            @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-            @prefix : <http://www.datacron-project.eu/ais_dataset#> .
-            @prefix unit: <http://www.datacron-project.eu/unit#> .
-            CONSTRUCT {?vessel ?event ?date}
-            WHERE{
-            SELECT ?vessel ?event ?date 
-            WHERE {
-            ?event :occurs ?obj .
-            ?obj :ofMovingObject ?vessel .
-            ?obj :hasGeometry ?geom1 .
-            ?geom1 ogc:asWKT ?point .
-            ?obj :hasTemporalFeature ?time.
-            ?time a :Instant.
-            ?time :TimeStart ?date.
+@prefix geof: <http://www.opengis.net/def/function/geosparql/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix strdf: <http://strdf.di.uoa.gr/ontology#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ogc: <http://www.opengis.net/ont/geosparql#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix : <http://www.datacron-project.eu/ais_dataset#> .
+@prefix unit: <http://www.datacron-project.eu/unit#> .
+CONSTRUCT {?vessel ?event ?date}
+WHERE{
+SELECT ?vessel ?event ?date 
+WHERE {
+?event :occurs ?obj .
+?obj :ofMovingObject ?vessel .
+?obj :hasGeometry ?geom1 .
+?geom1 ogc:asWKT ?point .
+?obj :hasTemporalFeature ?time.
+?time a :Instant.
+?time :TimeStart ?date.
 
-            ?area a :Natura2000_zone .
-            ?area :hasGeometry ?geom2 .
-            ?geom2 ogc:asWKT ?zone .
+?area a :Natura2000_zone .
+?area :hasGeometry ?geom2 .
+?geom2 ogc:asWKT ?zone .
 
-            FILTER(geof:sfWithin(?point ,?zone ) && ?area = """+area_code+""")
-            }
-            } LIMIT 10
-            """
+FILTER(geof:sfWithin(?point ,?zone ) && ?area = """+area_code+""")
+}
+} LIMIT 10"""
             con = ConstructQuery('http://79.35.17.201:8890/DAV/provolone', 'http://79.35.17.201:8890/sparql/',
                                  'http://79.35.17.201:8890/sparql-auth/', 'operator',
                                  'operator')  # user #pw
@@ -287,20 +278,18 @@ class ProtectedArea():
 
             result = con.construct_query(
                 """
-                @prefix geof: <http://www.opengis.net/def/function/geosparql/> .
-                @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-                @prefix strdf: <http://strdf.di.uoa.gr/ontology#> .
-                @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-                @prefix ogc: <http://www.opengis.net/ont/geosparql#> .
-                @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-                @prefix : <http://www.datacron-project.eu/ais_dataset#> .
-                @prefix unit: <http://www.datacron-project.eu/unit#> .            
-                SELECT DISTINCT ?vessel ?event ?date 
-                WHERE {
-                ?vessel ?event ?date.
-                FILTER(?vessel="""+ves+""" && ?event="""+eve+""").
-                }
-                """)
+@prefix geof: <http://www.opengis.net/def/function/geosparql/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix strdf: <http://strdf.di.uoa.gr/ontology#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ogc: <http://www.opengis.net/ont/geosparql#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix : <http://www.datacron-project.eu/ais_dataset#> .
+@prefix unit: <http://www.datacron-project.eu/unit#> .            
+SELECT DISTINCT ?vessel ?event ?date 
+WHERE {
+?vessel ?event ?date.
+FILTER(?vessel="""+ves+""" && ?event="""+eve+""").}""")
 
             print(result)
             triples = result["results"]["bindings"]
@@ -372,25 +361,24 @@ class TrajectoryAndGap():
                 ves = ":" + self.vessel
             sparql = SPARQLWrapper("http://" + IP_PORT + "/sparql/")
             sparql.setQuery("""
-                @prefix geof: <http://www.opengis.net/def/function/geosparql/> .
-                @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-                @prefix strdf: <http://strdf.di.uoa.gr/ontology#> .
-                @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-                @prefix ogc: <http://www.opengis.net/ont/geosparql#> .
-                @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-                @prefix : <http://www.datacron-project.eu/ais_dataset#> .
-                @prefix unit: <http://www.datacron-project.eu/unit#> .
+@prefix geof: <http://www.opengis.net/def/function/geosparql/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix strdf: <http://strdf.di.uoa.gr/ontology#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ogc: <http://www.opengis.net/ont/geosparql#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix : <http://www.datacron-project.eu/ais_dataset#> .
+@prefix unit: <http://www.datacron-project.eu/unit#> .
 
-                SELECT DISTINCT ?port_point ?instance_port ?name
-                WHERE{
+SELECT DISTINCT ?port_point ?instance_port ?name
+WHERE{
 
-                ?port a ?instance_port .
-                ?port :hasPlaceName ?name.
-                ?port :hasGeometry ?geom1 .
-                ?geom1 ogc:asWKT ?port_point
-                FILTER (?instance_port = :Port || ?instance_port = :FishingPort).
-                }
-                """)
+?port a ?instance_port .
+?port :hasPlaceName ?name.
+?port :hasGeometry ?geom1 .
+?geom1 ogc:asWKT ?port_point
+FILTER (?instance_port = :Port || ?instance_port = :FishingPort).
+}""")
 
             sparql.setReturnFormat(JSON)
             result = sparql.query().convert()
@@ -415,28 +403,27 @@ class TrajectoryAndGap():
             # points = np.array(points)
 
             self.query = """
-                            @prefix geof: <http://www.opengis.net/def/function/geosparql/> .
-                            @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-                            @prefix strdf: <http://strdf.di.uoa.gr/ontology#> .
-                            @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-                            @prefix ogc: <http://www.opengis.net/ont/geosparql#> .
-                            @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-                            @prefix : <http://www.datacron-project.eu/ais_dataset#> .
-                            @prefix unit: <http://www.datacron-project.eu/unit#> .
+@prefix geof: <http://www.opengis.net/def/function/geosparql/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix strdf: <http://strdf.di.uoa.gr/ontology#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ogc: <http://www.opengis.net/ont/geosparql#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix : <http://www.datacron-project.eu/ais_dataset#> .
+@prefix unit: <http://www.datacron-project.eu/unit#> .
 
-                            SELECT DISTINCT ?time ?timestamp ?point
-                            WHERE{
-                            ?node :ofMovingObject ?vessel .
-                            ?node :hasTemporalFeature ?time.
-                            ?time :TimeStart ?timestamp .
+SELECT DISTINCT ?time ?timestamp ?point
+WHERE{
+?node :ofMovingObject ?vessel .
+?node :hasTemporalFeature ?time.
+?time :TimeStart ?timestamp .
 
-                            ?node :hasGeometry ?geom .
-                            ?geom ogc:asWKT ?point .
-                            FILTER (?vessel = """+ves+""").
-                            }
-                            ORDER BY ASC(?time)
-                            LIMIT 500
-                            """
+?node :hasGeometry ?geom .
+?geom ogc:asWKT ?point .
+FILTER (?vessel = """+ves+""").
+}
+ORDER BY ASC(?time)
+LIMIT 500"""
             sparql.setQuery(self.query)
             sparql.setReturnFormat(JSON)
             result = sparql.query().convert()

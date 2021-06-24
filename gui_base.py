@@ -5,11 +5,11 @@ import cv2
 from PIL import Image, ImageTk
 from queries import EventForShip, InterdictionArea, ProtectedArea, TrajectoryAndGap, CustomQuery
 import tkinter.font as font
+from explained_queries import *
 
 
 class gui():
     def __init__(self):
-        self.flag = False
         self.initialize()
 
     def initialize(self):
@@ -43,7 +43,6 @@ class gui():
         self.canvas.pack(pady=40)
         photo = ImageTk.PhotoImage(master=self.canvas, image=Image.fromarray(img))
         self.canvas.create_image(0, 0, image=photo, anchor=NW)
-        print(self.flag)
 
         self.expert = Button(text="Expert", command=self.expert_mode, bg="blue", fg="white", font=font.BOLD)
         self.expert.pack(fill='x',padx = 20, pady=30, side=RIGHT, ipadx=28)
@@ -70,10 +69,10 @@ class gui():
         prefixes += "\n\nSELECT COUNT(*) WHERE {?s ?p ?o}"
 
         self.text.insert("end", prefixes)
-        close = Button(self.gui, text="Back", command=self.gui.destroy)
+        close = Button(self.gui, text="Back", command=self.gui.destroy, bg="black", fg="white")
         close.pack(fill='x', pady=5, side=BOTTOM, ipadx=28)
 
-        run = Button(self.gui, text="Run", command=self.custom_query)
+        run = Button(self.gui, text="Run", command=self.custom_query, bg="green", fg="white")
         run.pack(fill='x', pady=5, side=BOTTOM, ipadx=28)
 
         self.text.pack(side="left", fill="y")
@@ -115,6 +114,8 @@ class gui():
 
         self.query = Button(text="Run Query", command=self.run_query)
         self.query.pack(fill='x', padx=5, pady=5)
+        self.query = Button(text="Show Query", command=self.show_query)
+        self.query.pack(fill='x', padx=5, pady=5)
         self.button_back = Button(text="Back", command=self.back)
         self.button_back.pack(fill='x', padx=5, pady=5)
 
@@ -150,6 +151,8 @@ class gui():
 
         self.query = Button(text="Run Query", command=self.run_query)
         self.query.pack(fill='x', padx=5, pady=5)
+        self.query = Button(text="Show Query", command=self.show_query, bg="green", fg="white", font=font.BOLD)
+        self.query.pack(fill='x', padx=5, pady=5)
         self.button_back = Button(text="Back", command=self.back)
         self.button_back.pack(fill='x', padx=5, pady=5)
 
@@ -168,6 +171,8 @@ class gui():
         self.vesselEntry.pack(fill='x', padx=5, pady=5)
 
         self.query = Button(text="Run Query", command=self.run_query)
+        self.query.pack(fill='x', padx=5, pady=5)
+        self.query = Button(text="Show Query", command=self.show_query, bg="green", fg="white", font=font.BOLD)
         self.query.pack(fill='x', padx=5, pady=5)
         self.button_back = Button(text="Back", command=self.back)
         self.button_back.pack(fill='x', padx=5, pady=5)
@@ -204,8 +209,48 @@ class gui():
 
         self.query = Button(text="Run Query", command=self.run_query, bg="green", fg="white", font=font.BOLD)
         self.query.pack(fill='x', padx=5, pady=5)
+        self.query = Button(text="Show Query", command=self.show_query, bg="green", fg="white", font=font.BOLD)
+        self.query.pack(fill='x', padx=5, pady=5)
         self.button_back = Button(text="Back", command=self.back, bg="black", fg="white",font=font.BOLD)
         self.button_back.pack(fill='x', padx=5, pady=5)
+
+    def show_query(self):
+        query_window = Tk()
+        query_window.title("Query")
+        text = Text(query_window)
+        if self.choice == 'Event for ship':
+            text.insert("end", EVENT_FOR_SHIP_QUERY)
+        elif self.choice=='Interdiction Fishing Area':
+            scrollbar = Scrollbar(query_window, orient=VERTICAL)
+            scrollbar.pack(side="right", fill='y')
+            text = Text(query_window, yscrollcommand=scrollbar.set)
+            text.insert("end", QUERY_INTERDICTION_AREA)
+        elif self.choice=='Protected Area':
+            scrollbar = Scrollbar(query_window, orient=VERTICAL)
+            scrollbar.pack(side="right", fill='y')
+            text = Text(query_window, yscrollcommand=scrollbar.set)
+            text.insert("end", PROTECTED_AREA_QUERY)
+        elif self.choice=='Trajectory with Gap':
+            scrollbar = Scrollbar(query_window, orient=VERTICAL)
+            scrollbar.pack(side="right", fill='y')
+            text = Text(query_window, yscrollcommand=scrollbar.set)
+            text.insert("end", TRAJ_GAP_QUERY)
+
+        text.tag_config("explaination", foreground="blue")
+        #text.tag_config("prefix", foreground="orange")
+        self.text_search(text,"# EXPLAINATION:","explaination")
+        #self.text_search(text, "@prefix", "prefix")
+        text.configure(state=DISABLED)
+        text.pack(side="left", fill="y")
+
+    def text_search(self, text_widget, keyword, tag):
+        pos = '1.0'
+        while True:
+            idx = text_widget.search(keyword, pos, END)
+            if not idx:
+                break
+            pos = '{}+{}c'.format(idx, len(keyword))
+            text_widget.tag_add(tag, idx, str(idx)+" lineend")
 
     def run_query(self):
         print(self.choice)
