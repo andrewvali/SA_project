@@ -32,7 +32,7 @@ class gui():
         self.choice_cb.pack(fill='x', padx=50, pady=5)
         self.choice_cb.bind('<<ComboboxSelected>>')
 
-        self.query = Button(text="Submit", command=self.analysis, bg="green", fg="white", font=font.BOLD)
+        self.query = Button(text="Submit", command=self.analysis, bg="green", fg="black", font=font.BOLD)
         self.query.pack(fill='x',padx=50,pady=5)
         img = cv2.imread("Immagine1.png")
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -43,7 +43,7 @@ class gui():
         photo = ImageTk.PhotoImage(master=self.canvas, image=Image.fromarray(img))
         self.canvas.create_image(0, 0, image=photo, anchor=NW)
 
-        self.expert = Button(text="Custom Query", command=self.expert_mode, bg="blue", fg="white", font=font.BOLD)
+        self.expert = Button(text="Custom Query", command=self.expert_mode, bg="blue", fg="black", font=font.BOLD)
 
         self.expert.pack(fill='x',padx = 20, pady=30, side=RIGHT, ipadx=28)
 
@@ -71,10 +71,10 @@ class gui():
         prefixes += "\n\nSELECT COUNT(*) WHERE {?s ?p ?o}"
 
         self.text.insert("end", prefixes)
-        close = Button(self.gui, text="Back", command=self.gui.destroy, bg="black", fg="white")
+        close = Button(self.gui, text="Back", command=self.gui.destroy, bg="black", fg="black")
         close.pack(fill='x', pady=5, side=BOTTOM, ipadx=28)
 
-        run = Button(self.gui, text="Run", command=self.custom_query, bg="green", fg="white")
+        run = Button(self.gui, text="Run", command=self.custom_query, bg="green", fg="black")
         run.pack(fill='x', pady=5, side=BOTTOM, ipadx=28)
 
         self.text.pack(side="left", fill="y")
@@ -119,7 +119,7 @@ class gui():
         self.query.pack(fill='x', padx=5, pady=5)
         self.query = Button(text="Show Query", command=self.show_query, bg="deep sky blue", fg="black", font=font.BOLD)
         self.query.pack(fill='x', padx=5, pady=5)
-        self.button_back = Button(text="Back", command=self.back, bg="white", fg="black", font=font.BOLD)
+        self.button_back = Button(text="Back", command=self.back, bg="black", fg="black", font=font.BOLD)
         self.button_back.pack(fill='x', padx=5, pady=5)
 
 
@@ -167,7 +167,7 @@ class gui():
         self.query.pack(fill='x', padx=5, pady=5)
         self.query = Button(text="Show Query", command=self.show_query, bg="deep sky blue", fg="black", font=font.BOLD)
         self.query.pack(fill='x', padx=5, pady=5)
-        self.button_back = Button(text="Back", command=self.back, bg="white", fg="black", font=font.BOLD)
+        self.button_back = Button(text="Back", command=self.back, bg="black", fg="black", font=font.BOLD)
         self.button_back.pack(fill='x', padx=5, pady=5)
 
     def analysis_interdiction_area(self):
@@ -188,7 +188,7 @@ class gui():
         self.query.pack(fill='x', padx=5, pady=5)
         self.query = Button(text="Show Query", command=self.show_query, bg="deep sky blue", fg="black", font=font.BOLD)
         self.query.pack(fill='x', padx=5, pady=5)
-        self.button_back = Button(text="Back", command=self.back, bg="white", fg="black", font=font.BOLD)
+        self.button_back = Button(text="Back", command=self.back, bg="black", fg="black", font=font.BOLD)
         self.button_back.pack(fill='x', padx=5, pady=5)
 
     def analysis_event_per_vessel(self):
@@ -225,7 +225,7 @@ class gui():
         self.query.pack(fill='x', padx=5, pady=5)
         self.query = Button(text="Show Query", command=self.show_query, bg="deep sky blue", fg="black", font=font.BOLD)
         self.query.pack(fill='x', padx=5, pady=5)
-        self.button_back = Button(text="Back", command=self.back, bg="white", fg="black",font=font.BOLD)
+        self.button_back = Button(text="Back", command=self.back, bg="black", fg="black",font=font.BOLD)
         self.button_back.pack(fill='x', padx=5, pady=5)
 
     def show_query(self):
