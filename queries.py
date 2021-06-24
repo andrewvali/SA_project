@@ -66,24 +66,6 @@ class EventForShip():
 
             self.query = EVENT_FOR_SHIP_QUERY.replace("[EVENT]",":"+self.event).replace("[VESSEL]",ves)
 
-            '''self.query= """@prefix geof: <http://www.opengis.net/def/function/geosparql/> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix strdf: <http://strdf.di.uoa.gr/ontology#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix ogc: <http://www.opengis.net/ont/geosparql#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix : <http://www.datacron-project.eu/ais_dataset#> .
-@prefix unit: <http://www.datacron-project.eu/unit#> .
-
-SELECT DISTINCT ?vessel ?event (COUNT(?event) as ?num_event)
-WHERE{
-?event :occurs ?node.
-?node :ofMovingObject ?vessel
-FILTER(?event = :""" + self.event + """ && ?vessel = """ + ves + """)
-}GROUP BY ?vessel ?event HAVING(COUNT(?event)>2)
-ORDER BY DESC(?num_event)"""
-            '''
-
             sparql.setQuery(self.query)
 
             sparql.setReturnFormat(JSON)
@@ -95,7 +77,8 @@ ORDER BY DESC(?num_event)"""
                 msg = ""
                 for i in t:
                     msg += " " + str(triple[i]["value"]).split("/")[-1].split("#")[-1]
-                self.res += msg + "\n"
+                msg = msg.split(" ")
+                self.res += "VESSEL: "+msg[1] +" EVENT: "+msg[2]+" OCCURENCES: "+msg[3]+ "\n"
 
             self.gui_result()
         else:
@@ -104,11 +87,25 @@ ORDER BY DESC(?num_event)"""
     def gui_result(self):
         self.gui = Tk()
         #self.gui.geometry('700x500')
-        self.gui.title("Results of events: " +self.vessel)
+        self.gui.title("Result of event per vessel: " +self.vessel)
         scrollbar = Scrollbar(self.gui, orient=VERTICAL)
         scrollbar.pack(side="right", fill='y')
         text = Text(self.gui, yscrollcommand=scrollbar.set)
         text.insert("end", self.res)
+        text.tag_config("vessel", foreground="blue")
+        # text.tag_config("prefix", foreground="orange")
+        text_search(text, "VESSEL:", "vessel",True)
+
+        text.tag_config("event", foreground="blue")
+        # text.tag_config("prefix", foreground="orange")
+        text_search(text, "EVENT:", "event",True)
+
+
+        text.tag_config("occurences", foreground="blue")
+        # text.tag_config("prefix", foreground="orange")
+        text_search(text, "OCCURENCES:", "occurences", True)
+
+        text.configure(state=DISABLED)
         show_query = Button(self.gui, text="Show Query", command=self.show_query)
         show_query.pack(fill='x', padx=5, pady=5, side=BOTTOM)
         text.pack(side="left", fill="y")
@@ -123,9 +120,13 @@ ORDER BY DESC(?num_event)"""
 
         self.gui.destroy()
         query_window = Tk()
-        query_window.title("Query")
+        query_window.title("Query of event per vessel")
         text = Text(query_window)
         text.insert("end", self.query)
+        text.tag_config("explaination", foreground="blue")
+        # text.tag_config("prefix", foreground="orange")
+        text_search(text, "# EXPLAINATION:", "explaination")
+        text.configure(state=DISABLED)
         btn = Button(query_window, text="Back", command=event_button)
         btn.pack(fill='x', padx=5, pady=5, side=BOTTOM)
         text.pack(side="left", fill="y")
@@ -149,36 +150,6 @@ class InterdictionArea():
 
             self.query = QUERY_INTERDICTION_AREA.replace("[VESSEL]", ves)
 
-            '''    self.query = """
-            @prefix geof: <http://www.opengis.net/def/function/geosparql/> .
-            @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-            @prefix strdf: <http://strdf.di.uoa.gr/ontology#> .
-            @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-            @prefix ogc: <http://www.opengis.net/ont/geosparql#> .
-            @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-            @prefix : <http://www.datacron-project.eu/ais_dataset#> .
-            @prefix unit: <http://www.datacron-project.eu/unit#> .
-                            
-            SELECT DISTINCT ?vessel ?tstart ?point
-            WHERE{
-            
-            ?area a :Fishing_Interdiction_area.
-            
-            :StoppedInit :occurs ?obj.
-            ?obj :ofMovingObject ?vessel.
-            ?obj :hasTemporalFeature ?timestamp_start.
-            ?timestamp_start :TimeStart ?tstart.
-            
-            ?area :hasGeometry ?geom2 .
-            ?geom2 ogc:asWKT ?zone .
-            
-            ?obj :hasGeometry ?geom .
-            ?geom ogc:asWKT ?point .
-            
-            
-            FILTER (geof:sfWithin(?point, ?zone) && ?vessel = """+ves+""")
-            } LIMIT 10""" '''
-
             sparql.setQuery(self.query)
 
             sparql.setReturnFormat(JSON)
@@ -192,9 +163,12 @@ class InterdictionArea():
                 for i in t:
                     msg += " " + str(triple[i]["value"]).split("/")[-1].split("#")[-1]
                 #points.append([float(coord) for coord in msg.split(";")[-1].split("(")[-1].split(")")[0].split(" ")])
-                self.res += msg + "\n"
+                msg = msg.replace("T"," ")
+                msg = msg.replace("POIN","POINT:")
+                msg = msg.replace("SRID=4322;","")
+                msg = msg.split(" ")
 
-
+                self.res += "VESSEL: "+ msg[2]+" DATE and TIME: "+msg[3]+" "+msg[4]+" "+msg[5]+" "+msg[6]+ "\n"
             self.gui_result()
         else:
             showinfo('Warning!', 'Complete all fields! ')
@@ -202,11 +176,24 @@ class InterdictionArea():
     def gui_result(self):
         self.gui = Tk()
         #self.gui.geometry('700x500')
-        self.gui.title("Results of events: " +self.vessel)
+        self.gui.title("Result of events in an interdicted fishing area. VESSEL: " +self.vessel)
         scrollbar = Scrollbar(self.gui, orient=VERTICAL)
         scrollbar.pack(side="right", fill='y')
         text = Text(self.gui, yscrollcommand=scrollbar.set)
         text.insert("end", self.res)
+        text.tag_config("vessel", foreground="blue")
+        # text.tag_config("prefix", foreground="orange")
+        text_search(text, "VESSEL:", "vessel", True)
+
+        text.tag_config("date_and_time", foreground="blue")
+        # text.tag_config("prefix", foreground="orange")
+        text_search(text, "DATE and TIME:", "date_and_time", True)
+
+        text.tag_config("point", foreground="blue")
+        # text.tag_config("prefix", foreground="orange")
+        text_search(text, "POINT:", "point", True)
+        text.configure(state=DISABLED)
+
         show_query = Button(self.gui, text="Show Query", command=self.show_query)
         show_query.pack(fill='x', padx=5, pady=5, side=BOTTOM)
         text.pack(side="left", fill="y")
@@ -224,6 +211,10 @@ class InterdictionArea():
         query_window.title("Query")
         text = Text(query_window)
         text.insert("end", self.query)
+        text.tag_config("explaination", foreground="blue")
+        # text.tag_config("prefix", foreground="orange")
+        text_search(text, "# EXPLAINATION:", "explaination")
+
         btn = Button(query_window, text="Back", command=event_button)
         btn.pack(fill='x', padx=5, pady=5, side=BOTTOM)
         text.pack(side="left", fill="y")
@@ -254,34 +245,6 @@ class ProtectedArea():
 
             self.query_construct= PROTECTED_AREA_CONSTRUCT.replace("[AREA]",area_code)
 
-            '''self.query_construct = """
-@prefix geof: <http://www.opengis.net/def/function/geosparql/> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix strdf: <http://strdf.di.uoa.gr/ontology#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix ogc: <http://www.opengis.net/ont/geosparql#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix : <http://www.datacron-project.eu/ais_dataset#> .
-@prefix unit: <http://www.datacron-project.eu/unit#> .
-CONSTRUCT {?vessel ?event ?date}
-WHERE{
-SELECT ?vessel ?event ?date 
-WHERE {
-?event :occurs ?obj .
-?obj :ofMovingObject ?vessel .
-?obj :hasGeometry ?geom1 .
-?geom1 ogc:asWKT ?point .
-?obj :hasTemporalFeature ?time.
-?time a :Instant.
-?time :TimeStart ?date.
-
-?area a :Natura2000_zone .
-?area :hasGeometry ?geom2 .
-?geom2 ogc:asWKT ?zone .
-
-FILTER(geof:sfWithin(?point ,?zone ) && ?area = """+area_code+""")
-}
-} LIMIT 10"""'''
             con = ConstructQuery('http://79.35.17.201:8890/DAV/provolone', 'http://79.35.17.201:8890/sparql/',
                                  'http://79.35.17.201:8890/sparql-auth/', 'operator',
                                  'operator')  # user #pw
@@ -293,22 +256,6 @@ FILTER(geof:sfWithin(?point ,?zone ) && ?area = """+area_code+""")
 
             result = con.construct_query(self.area_query)
 
-            ''' result = con.construct_query(
-              """
-            @prefix geof: <http://www.opengis.net/def/function/geosparql/> .
-            @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-            @prefix strdf: <http://strdf.di.uoa.gr/ontology#> .
-            @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-            @prefix ogc: <http://www.opengis.net/ont/geosparql#> .
-            @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-            @prefix : <http://www.datacron-project.eu/ais_dataset#> .
-            @prefix unit: <http://www.datacron-project.eu/unit#> .            
-            SELECT DISTINCT ?vessel ?event ?date 
-            WHERE {
-            ?vessel ?event ?date.
-            FILTER(?vessel="""+ves+""" && ?event="""+eve+""").}""")'''
-
-            print(result)
             triples = result["results"]["bindings"]
             #triples.sort(key=lambda x:x['o']['value'])
             t = result["head"]["vars"]
@@ -318,8 +265,9 @@ FILTER(geof:sfWithin(?point ,?zone ) && ?area = """+area_code+""")
                 for i in t:
                     print(msg)
                     msg += " " + str(triple[i]["value"]).split("/")[-1].split("#")[-1]
-
-                self.res += msg + "\n"
+                msg = msg.replace("T"," ")
+                msg = msg.split(" ")
+                self.res += "VESSEL: "+ msg[1]+" EVENT: "+msg[2]+" DATE and TIME: "+msg[3]+" " +msg[4]+ "\n"
             #self.res = self.res.replace("T"," ")
 
             self.gui_result()
@@ -329,11 +277,25 @@ FILTER(geof:sfWithin(?point ,?zone ) && ?area = """+area_code+""")
     def gui_result(self):
         self.gui = Tk()
         #self.gui.geometry('700x500')
-        self.gui.title("Results of protected zone: " +self.protectedArea)
+        self.gui.title("Result of vessels activity in protected area. AREA: " +self.protectedArea
+                       +" - VESSEL: "+self.vessel+" - EVENT: "+self.event)
         scrollbar = Scrollbar(self.gui, orient=VERTICAL)
         scrollbar.pack(side="right", fill='y')
         text = Text(self.gui, yscrollcommand=scrollbar.set)
         text.insert("end", self.res)
+        text.tag_config("vessel", foreground="blue")
+        # text.tag_config("prefix", foreground="orange")
+        text_search(text, "VESSEL:", "vessel", True)
+
+        text.tag_config("event", foreground="blue")
+        # text.tag_config("prefix", foreground="orange")
+        text_search(text, "EVENT:", "event", True)
+
+        text.tag_config("date_and_time", foreground="blue")
+        # text.tag_config("prefix", foreground="orange")
+        text_search(text, "DATE and TIME:", "date_and_time", True)
+
+        text.configure(state=DISABLED)
         show_query = Button(self.gui, text="Show Query", command=self.show_query)
         show_query.pack(fill='x', padx=5, pady=5, side=BOTTOM)
         text.pack(side="left", fill="y")
@@ -353,8 +315,13 @@ FILTER(geof:sfWithin(?point ,?zone ) && ?area = """+area_code+""")
         scrollbar.pack(side="right", fill='y')
         text = Text(query_window,yscrollcommand=scrollbar.set)
         text.insert("end", self.query_construct+"\n"+self.area_query)
+        text.tag_config("explaination", foreground="blue")
+        # text.tag_config("prefix", foreground="orange")
+        text_search(text, "# EXPLAINATION:", "explaination")
+        text.configure(state=DISABLED)
         btn = Button(query_window, text="Back", command=event_button)
         btn.pack(fill='x', padx=5, pady=5, side=BOTTOM)
+        scrollbar.config(command=text.yview)
         text.pack(side="left", fill="y")
 
 # Geografic zone (default Brest and Northern Brittany)
@@ -377,25 +344,7 @@ class TrajectoryAndGap():
             else:
                 ves = ":" + self.vessel
             sparql = SPARQLWrapper("http://" + IP_PORT + "/sparql/")
-            '''  sparql.setQuery("""
-            @prefix geof: <http://www.opengis.net/def/function/geosparql/> .
-            @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-            @prefix strdf: <http://strdf.di.uoa.gr/ontology#> .
-            @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-            @prefix ogc: <http://www.opengis.net/ont/geosparql#> .
-            @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-            @prefix : <http://www.datacron-project.eu/ais_dataset#> .
-            @prefix unit: <http://www.datacron-project.eu/unit#> .
-            
-            SELECT DISTINCT ?port_point ?instance_port ?name
-            WHERE{
-            
-            ?port a ?instance_port .
-            ?port :hasPlaceName ?name.
-            ?port :hasGeometry ?geom1 .
-            ?geom1 ogc:asWKT ?port_point
-            FILTER (?instance_port = :Port || ?instance_port = :FishingPort).
-            }""")'''
+
             sparql.setQuery(TRAJ_GAP_QUERY_1)
 
             sparql.setReturnFormat(JSON)
@@ -422,29 +371,6 @@ class TrajectoryAndGap():
 
             self.query = TRAJ_GAP_QUERY_2.replace("[VESSEL]", ves)
 
-            '''self.query = """
-            @prefix geof: <http://www.opengis.net/def/function/geosparql/> .
-            @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-            @prefix strdf: <http://strdf.di.uoa.gr/ontology#> .
-            @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-            @prefix ogc: <http://www.opengis.net/ont/geosparql#> .
-            @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-            @prefix : <http://www.datacron-project.eu/ais_dataset#> .
-            @prefix unit: <http://www.datacron-project.eu/unit#> .
-            
-            SELECT DISTINCT ?time ?timestamp ?point
-            WHERE{
-            ?node :ofMovingObject ?vessel .
-            ?node :hasTemporalFeature ?time.
-            ?time :TimeStart ?timestamp .
-            
-            ?node :hasGeometry ?geom .
-            ?geom ogc:asWKT ?point .
-            FILTER (?vessel = """+ves+""").
-            }
-            ORDER BY ASC(?time)
-            LIMIT 500"""'''
-
             sparql.setQuery(self.query)
             sparql.setReturnFormat(JSON)
             result = sparql.query().convert()
@@ -460,7 +386,12 @@ class TrajectoryAndGap():
                     msg += " " + str(triple[i]["value"]).split("/")[-1].split("#")[-1]
                 c = msg.split(" ")
                 c = c[1].split("t")
-                self.result += msg+"\n"
+                m = msg
+                m = m.replace("T", " ")
+                m = m.replace("POIN", "POINT:")
+                m = m.replace("SRID=4322;", "")
+                m = m.split(" ")
+                self.result += "DATE and TIME: "+m[3]+" "+m[4]+" "+m[5]+" "+m[6]+"\n"
 
                 timestamp_vessel_point.append(int(c[1]))
                 self.points_vessel.append(
@@ -503,12 +434,20 @@ class TrajectoryAndGap():
             self.gui.destroy()
             self.show_map()
         self.gui = Tk()
-        self.gui.geometry('700x500')
-        self.gui.title("Result Trajectory Points")
+        #self.gui.geometry('700x500')
+        self.gui.title("Points Trajectory of vessel: "+self.vessel)
         scrollbar = Scrollbar(self.gui, orient=VERTICAL)
         scrollbar.pack(side="right", fill='y')
         text = Text(self.gui, yscrollcommand=scrollbar.set)
         text.insert("end", self.result)
+        text.tag_config("point", foreground="blue")
+        # text.tag_config("prefix", foreground="orange")
+        text_search(text, "POINT:", "point", True)
+
+        text.tag_config("date_and_time", foreground="blue")
+        # text.tag_config("prefix", foreground="orange")
+        text_search(text, "DATE and TIME:", "date_and_time", True)
+        text.configure(state=DISABLED)
         traj = Button(self.gui, text="Back", command=event_button)
         traj.pack(fill='x', padx=5, pady=5, side=BOTTOM)
         text.pack(side="left", fill="y")
@@ -516,23 +455,28 @@ class TrajectoryAndGap():
         scrollbar.config(command=text.yview)
         self.gui.mainloop()
 
-    def gui_result_query(self):
+    def show_query(self):
         def event_button():
             self.gui.destroy()
             self.show_map()
         self.gui = Tk()
-        self.gui.geometry('700x500')
-        self.gui.title("Result Gap Event")
+        #self.gui.geometry('700x500')
+        self.gui.title("Query of vessel trajectory with highlighted Gap event. VESSEL: "+self.vessel)
         scrollbar = Scrollbar(self.gui, orient=VERTICAL)
         scrollbar.pack(side="right", fill='y')
         text = Text(self.gui, yscrollcommand=scrollbar.set)
         text.insert("end", TRAJ_GAP_QUERY_1+"\n"+self.query)
+        text.tag_config("explaination", foreground="blue")
+        # text.tag_config("prefix", foreground="orange")
+        text_search(text, "# EXPLAINATION:", "explaination")
+        text.configure(state=DISABLED)
         traj = Button(self.gui, text="Back", command=event_button)
         traj.pack(fill='x', padx=5, pady=5, side=BOTTOM)
         text.pack(side="left", fill="y")
 
         scrollbar.config(command=text.yview)
         self.gui.mainloop()
+
     def show_map(self):
         def event_button():
             self.map = pltMap(XMIN, YMIN, XMAX, YMAX)
@@ -542,7 +486,7 @@ class TrajectoryAndGap():
         def event_button_query():
             self.map = pltMap(XMIN, YMIN, XMAX, YMAX)
             window.destroy()
-            self.gui_result_query()
+            self.show_query()
 
         try:
             self.gui.destroy()
@@ -551,7 +495,7 @@ class TrajectoryAndGap():
         img = self.map.plot_gap_points_with_traj(points=self.points_vessel, gap_points=self.gap_points)
         height, width, no_channels = img.shape
         window = Tk()
-        window.title("Trajectory")
+        window.title("Vessel trajectory. VESSEL: "+self.vessel)
         canvas = Canvas(window, width=width, height=height)
         canvas.pack()
         photo = ImageTk.PhotoImage(master=canvas, image=Image.fromarray(img))
@@ -563,7 +507,18 @@ class TrajectoryAndGap():
         btn = Button(window, text="Show Query", command=event_button_query)
         btn.pack(fill='x', padx=5, pady=5, side=BOTTOM)
 
-
-
         window.mainloop()
 
+def text_search(text_widget, keyword, tag, flag=False):
+    pos = '1.0'
+
+    while True:
+        idx = text_widget.search(keyword, pos, END)
+        if not idx:
+            break
+        pos = '{}+{}c'.format(idx, len(keyword))
+        if flag:
+            s = pos
+        else:
+            s = str(idx) + " lineend"
+        text_widget.tag_add(tag, idx, s)

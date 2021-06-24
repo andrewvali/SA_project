@@ -6,7 +6,7 @@ from PIL import Image, ImageTk
 from queries import EventForShip, InterdictionArea, ProtectedArea, TrajectoryAndGap, CustomQuery
 import tkinter.font as font
 from explained_queries import *
-
+from tkinter.messagebox import showinfo
 
 class gui():
     def __init__(self):
@@ -19,10 +19,10 @@ class gui():
 
         self.root.title("Knowledge Base")
 
-        choices = ('Event for ship', 'Interdiction Fishing Area', 'Protected Area',
-                   'Trajectory with Gap')
+        choices = ('Event per vessel', 'Vessels in interdicted fishing area', 'Vessels in protected area',
+                   'Vessel trajectory with highlighted Gap event')
 
-        self.label = ttk.Label(text="Please select a choice:",font=font.BOLD)
+        self.label = ttk.Label(text="Please select a query",font=font.BOLD)
         self.label.pack(fill='x', padx=5, pady=5, side=TOP)
 
         selected_choice=StringVar()
@@ -34,19 +34,21 @@ class gui():
 
         self.query = Button(text="Submit", command=self.analysis, bg="green", fg="white", font=font.BOLD)
         self.query.pack(fill='x',padx=50,pady=5)
-
         img = cv2.imread("Immagine1.png")
-        img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-        height,width, _ = img.shape
+        height, width, _ = img.shape
         self.canvas = Canvas(self.root, width=width, height=height)
         self.canvas.pack(pady=40)
         photo = ImageTk.PhotoImage(master=self.canvas, image=Image.fromarray(img))
         self.canvas.create_image(0, 0, image=photo, anchor=NW)
 
-        self.expert = Button(text="Expert", command=self.expert_mode, bg="blue", fg="white", font=font.BOLD)
+        self.expert = Button(text="Custom Query", command=self.expert_mode, bg="blue", fg="white", font=font.BOLD)
+
         self.expert.pack(fill='x',padx = 20, pady=30, side=RIGHT, ipadx=28)
 
+        self.label2 = ttk.Label(text="...or write your query", font=font.BOLD)
+        self.label2.pack(fill='x', padx=5, pady=5, side=RIGHT)
 
 
         self.root.mainloop()
@@ -86,16 +88,17 @@ class gui():
 
     def analysis(self):
         self.choice = str(self.choice_cb.get())
+        self.label2.destroy()
         self.canvas.destroy()
         self.query.destroy()
         self.expert.destroy()
-        if self.choice == "Event for ship":
-            self.analysis_event_for_ship()
-        elif self.choice=='Interdiction Fishing Area':
+        if self.choice == "Event per vessel":
+            self.analysis_event_per_vessel()
+        elif self.choice=='Vessels in interdicted fishing area':
             self.analysis_interdiction_area()
-        elif self.choice == 'Protected Area':
+        elif self.choice == 'Vessels in protected area':
             self.analysis_protected_area()
-        elif self.choice == 'Trajectory with Gap':
+        elif self.choice == 'Vessel trajectory with highlighted Gap event':
             self.analysis_traj_gap()
 
     def analysis_traj_gap(self):
@@ -103,8 +106,8 @@ class gui():
         self.choice_cb.destroy()
         # self.event_cb.destroy()
         self.query.destroy()
-
-        self.label_vessel = ttk.Label(text="Write vessel code:")
+        self.root.title("Analysis of vessels trajectory")
+        self.label_vessel = ttk.Label(text="Write vessel code:", font=font.BOLD)
         self.label_vessel.pack(fill='x', padx=5, pady=5)
         vessel = StringVar()
 
@@ -112,11 +115,11 @@ class gui():
 
         self.vesselEntry.pack(fill='x', padx=5, pady=5)
 
-        self.query = Button(text="Run Query", command=self.run_query)
+        self.query = Button(text="Run Query", command=self.run_query, bg="lime green", fg="black", font=font.BOLD)
         self.query.pack(fill='x', padx=5, pady=5)
-        self.query = Button(text="Show Query", command=self.show_query)
+        self.query = Button(text="Show Query", command=self.show_query, bg="deep sky blue", fg="black", font=font.BOLD)
         self.query.pack(fill='x', padx=5, pady=5)
-        self.button_back = Button(text="Back", command=self.back)
+        self.button_back = Button(text="Back", command=self.back, bg="white", fg="black", font=font.BOLD)
         self.button_back.pack(fill='x', padx=5, pady=5)
 
 
@@ -125,15 +128,21 @@ class gui():
         self.choice_cb.destroy()
         # self.event_cb.destroy()
         self.query.destroy()
-
-        self.label_area = ttk.Label(text="Write protected area code:", font=font.BOLD)
+        self.root.title("Analysis of vessels activity in a protected area")
+        self.label_area = ttk.Label(text="Select protected area code:", font=font.BOLD)
         self.label_area.pack(fill='x', padx=5, pady=5)
-        protected_area = StringVar()
+        protected_area = ('natura_FR5302006', 'natura_FR5300019', 'natura_FR5300046', 'natura_FR5300020', 'natura_FR5302007', 'natura_FR5300021',
+                         'natura_FR5300048', 'natura_FR5300031', 'natura_FR5300059', 'natura_FR5300027', 'natura_FR5300032', 'natura_FR5300024',
+                          'natura_FR5300045', 'natura_FR5300017', 'natura_FR5300043', 'natura_FR5300009', 'natura_FR5300008')
 
-        self.protectedAreaEntry = Entry(textvariable=protected_area)
+        selected_choice_protected = StringVar()
+        self.protected_area_cb = ttk.Combobox(self.root, textvariable=selected_choice_protected)
+        self.protected_area_cb['values'] = protected_area
+        self.protected_area_cb['state'] = 'readonly'
+        self.protected_area_cb.pack(fill='x', padx=5, pady=5)
+        self.protected_area_cb.bind('<<ComboboxSelected>>')
 
-        self.protectedAreaEntry.pack(fill='x', padx=5, pady=5)
-        self.label_vessel = ttk.Label(text="Write vessel code:", font=font.BOLD)
+        self.label_vessel = ttk.Label(text="Write vessel code (write 'All' for every vessel): ", font=font.BOLD)
         self.label_vessel.pack(fill='x', padx=5, pady=5)
 
         vessel = StringVar()
@@ -141,19 +150,24 @@ class gui():
 
         self.vesselEntry.pack(fill='x', padx=5, pady=5)
 
-        self.label_event = ttk.Label(text="Write event code:", font=font.BOLD)
+
+        self.label_event = ttk.Label(text="Select event code (select 'All' for every event): ", font=font.BOLD)
         self.label_event.pack(fill='x', padx=5, pady=5)
+        event_choices = ('All','StoppedInit', 'StoppedEnd', 'HeadingChange', 'SpeedChangeStart', 'SpeedChangeEnd',
+                  'SlowMotionStart', 'SlowMotionEnd', 'GapEnd')
 
-        event = StringVar()
-        self.eventEntry = Entry(textvariable=event)
+        selected_choice = StringVar()
+        self.event_choices_cb = ttk.Combobox(self.root, textvariable=selected_choice)
+        self.event_choices_cb['values'] = event_choices
+        self.event_choices_cb['state'] = 'readonly'
+        self.event_choices_cb.pack(fill='x', padx=5, pady=5)
+        self.event_choices_cb.bind('<<ComboboxSelected>>')
 
-        self.eventEntry.pack(fill='x', padx=5, pady=5)
-
-        self.query = Button(text="Run Query", command=self.run_query)
+        self.query = Button(text="Run Query", command=self.run_query, bg="lime green", fg="black", font=font.BOLD)
         self.query.pack(fill='x', padx=5, pady=5)
-        self.query = Button(text="Show Query", command=self.show_query, bg="green", fg="white", font=font.BOLD)
+        self.query = Button(text="Show Query", command=self.show_query, bg="deep sky blue", fg="black", font=font.BOLD)
         self.query.pack(fill='x', padx=5, pady=5)
-        self.button_back = Button(text="Back", command=self.back)
+        self.button_back = Button(text="Back", command=self.back, bg="white", fg="black", font=font.BOLD)
         self.button_back.pack(fill='x', padx=5, pady=5)
 
     def analysis_interdiction_area(self):
@@ -161,8 +175,8 @@ class gui():
         self.choice_cb.destroy()
         # self.event_cb.destroy()
         self.query.destroy()
-
-        self.label_vessel = ttk.Label(text="Write vessel code:")
+        self.root.title("Analysis of vessels sopped in interdicted fishing area")
+        self.label_vessel = ttk.Label(text="Write vessel code (write 'All' for every vessel): ", font=font.BOLD)
         self.label_vessel.pack(fill='x', padx=5, pady=5)
         vessel = StringVar()
 
@@ -170,14 +184,14 @@ class gui():
 
         self.vesselEntry.pack(fill='x', padx=5, pady=5)
 
-        self.query = Button(text="Run Query", command=self.run_query)
+        self.query = Button(text="Run Query", command=self.run_query, bg="lime green", fg="black", font=font.BOLD)
         self.query.pack(fill='x', padx=5, pady=5)
-        self.query = Button(text="Show Query", command=self.show_query, bg="green", fg="white", font=font.BOLD)
+        self.query = Button(text="Show Query", command=self.show_query, bg="deep sky blue", fg="black", font=font.BOLD)
         self.query.pack(fill='x', padx=5, pady=5)
-        self.button_back = Button(text="Back", command=self.back)
+        self.button_back = Button(text="Back", command=self.back, bg="white", fg="black", font=font.BOLD)
         self.button_back.pack(fill='x', padx=5, pady=5)
 
-    def analysis_event_for_ship(self):
+    def analysis_event_per_vessel(self):
 
         self.choice = str(self.choice_cb.get())
         self.label.destroy()
@@ -185,11 +199,11 @@ class gui():
         #self.event_cb.destroy()
         self.query.destroy()
 
-        self.root.title("Analysis of Event for ship")
-        events = ('GapEnd', 'HeadingChange', 'StoppedInit', 'SpeedChangeStart', 'SlowMotionEnd',
-                  'SpeedChangeEnd', 'StoppedEnd', 'SlowMotionStart', 'fishing_area')
+        self.root.title("Analysis of Event per vessel")
+        events = ('StoppedInit', 'StoppedEnd', 'HeadingChange', 'SpeedChangeStart', 'SpeedChangeEnd',
+                  'SlowMotionStart', 'SlowMotionEnd', 'GapEnd')
 
-        self.label_vessel = ttk.Label(text="Write vessel code:", font=font.BOLD)
+        self.label_vessel = ttk.Label(text="Write vessel code (write 'All' for every vessel): ", font=font.BOLD)
         self.label_vessel.pack(fill='x', padx=5, pady=5)
         vessel = StringVar()
 
@@ -197,7 +211,7 @@ class gui():
 
         self.vesselEntry.pack(fill='x', padx=5, pady=5)
 
-        self.label_event_for_ship = ttk.Label(text="Please select an event:")
+        self.label_event_for_ship = ttk.Label(text="Please select an event of interest:", font=font.BOLD)
         self.label_event_for_ship.pack(fill='x', padx=5, pady=5)
 
         selected_event = StringVar()
@@ -207,34 +221,37 @@ class gui():
         self.event_cb.pack(fill='x', padx=5, pady=5)
         self.event_cb.bind('<<ComboboxSelected>>')
 
-        self.query = Button(text="Run Query", command=self.run_query, bg="green", fg="white", font=font.BOLD)
+        self.query = Button(text="Run Query", command=self.run_query, bg="lime green", fg="black", font=font.BOLD)
         self.query.pack(fill='x', padx=5, pady=5)
-        self.query = Button(text="Show Query", command=self.show_query, bg="green", fg="white", font=font.BOLD)
+        self.query = Button(text="Show Query", command=self.show_query, bg="deep sky blue", fg="black", font=font.BOLD)
         self.query.pack(fill='x', padx=5, pady=5)
-        self.button_back = Button(text="Back", command=self.back, bg="black", fg="white",font=font.BOLD)
+        self.button_back = Button(text="Back", command=self.back, bg="white", fg="black",font=font.BOLD)
         self.button_back.pack(fill='x', padx=5, pady=5)
 
     def show_query(self):
         query_window = Tk()
         query_window.title("Query")
         text = Text(query_window)
-        if self.choice == 'Event for ship':
+        if self.choice == 'Event per vessel':
             text.insert("end", EVENT_FOR_SHIP_QUERY)
-        elif self.choice=='Interdiction Fishing Area':
+        elif self.choice=='Vessels in interdicted fishing area':
             scrollbar = Scrollbar(query_window, orient=VERTICAL)
             scrollbar.pack(side="right", fill='y')
             text = Text(query_window, yscrollcommand=scrollbar.set)
             text.insert("end", QUERY_INTERDICTION_AREA)
-        elif self.choice=='Protected Area':
+            scrollbar.config(command=text.yview)
+        elif self.choice=='Vessels in protected area':
             scrollbar = Scrollbar(query_window, orient=VERTICAL)
             scrollbar.pack(side="right", fill='y')
             text = Text(query_window, yscrollcommand=scrollbar.set)
             text.insert("end", PROTECTED_AREA_CONSTRUCT + PROTECTED_AREA_QUERY)
-        elif self.choice=='Trajectory with Gap':
+            scrollbar.config(command=text.yview)
+        elif self.choice=='Vessel trajectory with highlighted Gap event':
             scrollbar = Scrollbar(query_window, orient=VERTICAL)
             scrollbar.pack(side="right", fill='y')
             text = Text(query_window, yscrollcommand=scrollbar.set)
             text.insert("end", TRAJ_GAP_QUERY_1+TRAJ_GAP_QUERY_2)
+            scrollbar.config(command=text.yview)
 
         text.tag_config("explaination", foreground="blue")
         #text.tag_config("prefix", foreground="orange")
@@ -242,6 +259,7 @@ class gui():
         #self.text_search(text, "@prefix", "prefix")
         text.configure(state=DISABLED)
         text.pack(side="left", fill="y")
+
 
     def text_search(self, text_widget, keyword, tag):
         pos = '1.0'
@@ -254,13 +272,13 @@ class gui():
 
     def run_query(self):
         print(self.choice)
-        if self.choice == 'Event for ship':
+        if self.choice == 'Event per vessel':
             EventForShip(self.event_cb.get(),self.vesselEntry.get())
-        elif self.choice=='Interdiction Fishing Area':
+        elif self.choice=='Vessels in interdicted fishing area':
             InterdictionArea(self.vesselEntry.get())
-        elif self.choice=='Protected Area':
-            ProtectedArea(self.protectedAreaEntry.get(),self.vesselEntry.get(),self.eventEntry.get())
-        elif self.choice=='Trajectory with Gap':
+        elif self.choice=='Vessels in protected area':
+            ProtectedArea(self.protected_area_cb.get(),self.vesselEntry.get(),self.event_choices_cb.get())
+        elif self.choice=='Vessel trajectory with highlighted Gap event':
             TrajectoryAndGap(self.vesselEntry.get())
 
 

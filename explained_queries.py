@@ -56,6 +56,7 @@ TRAJ_GAP_QUERY_2 = """# EXPLAINATION: RETURNS TRAJECTORY POINT OF A SPECIFIC VES
 
 SELECT DISTINCT ?time ?timestamp ?point
 WHERE{
+?node a :RawPosition.
 ?node :ofMovingObject ?vessel .
 ?node :hasTemporalFeature ?time.
 ?time :TimeStart ?timestamp .

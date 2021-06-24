@@ -178,6 +178,7 @@ class pltMap:
         img = img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
         # img is rgb, convert to opencv's default bgr
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        img = img[30:430, 120:-100]
         # display image with opencv or any operation you like
         #cv2.imshow("plot", img)
         #cv2.waitKey(0)
