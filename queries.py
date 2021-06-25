@@ -8,9 +8,30 @@ from pltMap import pltMap
 from PIL import Image, ImageTk
 from math import *
 from explained_queries import *
-
+import os
+import csv
 # IP SERVER
 IP_PORT = "79.35.17.201:8890"
+
+PATH_VESSEL_CODE = "dataset_vessel_type\\nari_static.csv"
+PATH_VESSEL_TYPE = "dataset_vessel_type\\vessel_type.CSV"
+
+my_dict = {}
+
+with open(os.path.abspath(PATH_VESSEL_CODE) ,mode="r") as csv_file:
+    csv_reader = csv.reader((csv_file), delimiter=",")
+
+    for row in csv_reader:
+        #l.append(row[1].upper())
+        my_dict["ves"+row[0]] = row[4]
+
+my_dict2 = {}
+
+with open(os.path.abspath(PATH_VESSEL_TYPE) ,mode="r") as csv_file2:
+    csv_reader2 = csv.reader((csv_file2), delimiter=";")
+
+    for row2 in csv_reader2:
+        my_dict2[row2[0]] = row2[1]
 
 class CustomQuery():
     def __init__(self,query):
@@ -78,7 +99,11 @@ class EventForShip():
                 for i in t:
                     msg += " " + str(triple[i]["value"]).split("/")[-1].split("#")[-1]
                 msg = msg.split(" ")
-                self.res += "VESSEL: "+msg[1] +" EVENT: "+msg[2]+" OCCURENCES: "+msg[3]+ "\n"
+                try:
+                    self.res += "VESSEL: "+msg[1]+" TYPE: "+my_dict2[my_dict[msg[1]]]+"\n" +" EVENT: "+msg[2]+" OCCURENCES: "+msg[3]+ "\n" +"\n"
+                except:
+                    self.res += "VESSEL: "+msg[1]+"\n"+"TYPE: not found"+" EVENT: "+msg[2]+" OCCURENCES: "+msg[3]+ "\n"+"\n"
+
 
             self.gui_result()
         else:
@@ -95,6 +120,10 @@ class EventForShip():
         text.tag_config("vessel", foreground="blue")
         # text.tag_config("prefix", foreground="orange")
         text_search(text, "VESSEL:", "vessel",True)
+
+        text.tag_config("type", foreground="blue")
+        # text.tag_config("prefix", foreground="orange")
+        text_search(text, "TYPE:", "type", True)
 
         text.tag_config("event", foreground="blue")
         # text.tag_config("prefix", foreground="orange")
@@ -167,8 +196,11 @@ class InterdictionArea():
                 msg = msg.replace("POIN","POINT:")
                 msg = msg.replace("SRID=4322;","")
                 msg = msg.split(" ")
-
-                self.res += "VESSEL: "+ msg[2]+" DATE and TIME: "+msg[3]+" "+msg[4]+" "+msg[5]+" "+msg[6]+ "\n"
+                try:
+                    self.res += "VESSEL: "+ msg[2]+" TYPE: "+my_dict2[my_dict[msg[1]]]+"\n"+" DATE and TIME: "+msg[3]+" "+msg[4]+" "+msg[5]+" "+msg[6]+ "\n" +"\n"
+                except:
+                    self.res += "VESSEL: " + msg[2] + " TYPE: not found" + "\n" + " DATE and TIME: " + \
+                                msg[3] + " " + msg[4] + " " + msg[5] + " " + msg[6] + "\n" + "\n"
             self.gui_result()
         else:
             showinfo('Warning!', 'Complete all fields! ')
@@ -184,6 +216,10 @@ class InterdictionArea():
         text.tag_config("vessel", foreground="blue")
         # text.tag_config("prefix", foreground="orange")
         text_search(text, "VESSEL:", "vessel", True)
+
+        text.tag_config("type", foreground="blue")
+        # text.tag_config("prefix", foreground="orange")
+        text_search(text, "TYPE:", "type", True)
 
         text.tag_config("date_and_time", foreground="blue")
         # text.tag_config("prefix", foreground="orange")
@@ -267,7 +303,12 @@ class ProtectedArea():
                     msg += " " + str(triple[i]["value"]).split("/")[-1].split("#")[-1]
                 msg = msg.replace("T"," ")
                 msg = msg.split(" ")
-                self.res += "VESSEL: "+ msg[1]+" EVENT: "+msg[2]+" DATE and TIME: "+msg[3]+" " +msg[4]+ "\n"
+
+                try:
+                    self.res += "VESSEL: "+ msg[1]+" TYPE: "+my_dict2[my_dict[msg[1]]]+"\n"+" EVENT: "+msg[2]+" DATE and TIME: "+msg[3]+" " +msg[4]+ "\n"+"\n"
+                except:
+                    self.res += "VESSEL: "+ msg[1]+" TYPE: not found"+"\n"+" EVENT: "+msg[2]+" DATE and TIME: "+msg[3]+" " +msg[4]+ "\n"+"\n"
+
             #self.res = self.res.replace("T"," ")
 
             self.gui_result()
@@ -286,6 +327,10 @@ class ProtectedArea():
         text.tag_config("vessel", foreground="blue")
         # text.tag_config("prefix", foreground="orange")
         text_search(text, "VESSEL:", "vessel", True)
+
+        text.tag_config("type", foreground="blue")
+        # text.tag_config("prefix", foreground="orange")
+        text_search(text, "TYPE:", "type", True)
 
         text.tag_config("event", foreground="blue")
         # text.tag_config("prefix", foreground="orange")
@@ -435,7 +480,10 @@ class TrajectoryAndGap():
             self.show_map()
         self.gui = Tk()
         #self.gui.geometry('700x500')
-        self.gui.title("Points Trajectory of vessel: "+self.vessel)
+        try:
+            self.gui.title("Points Trajectory of vessel: "+self.vessel+" type: "+my_dict2[my_dict[self.vessel]])
+        except:
+            self.gui.title("Points Trajectory of vessel: " + self.vessel + " type: not found")
         scrollbar = Scrollbar(self.gui, orient=VERTICAL)
         scrollbar.pack(side="right", fill='y')
         text = Text(self.gui, yscrollcommand=scrollbar.set)
@@ -495,7 +543,7 @@ class TrajectoryAndGap():
         img = self.map.plot_gap_points_with_traj(points=self.points_vessel, gap_points=self.gap_points)
         height, width, no_channels = img.shape
         window = Tk()
-        window.title("Vessel trajectory. VESSEL: "+self.vessel)
+        window.title("Trajectory. VESSEL: "+self.vessel+" TYPE: "+my_dict2(my_dict[self.vessel]))
         canvas = Canvas(window, width=width, height=height)
         canvas.pack()
         photo = ImageTk.PhotoImage(master=canvas, image=Image.fromarray(img))
