@@ -54,19 +54,18 @@ TRAJ_GAP_QUERY_2 = """# EXPLAINATION: RETURNS TRAJECTORY POINT OF A SPECIFIC VES
 @prefix : <http://www.datacron-project.eu/ais_dataset#> .
 @prefix unit: <http://www.datacron-project.eu/unit#> .
 
-SELECT DISTINCT ?time ?timestamp ?point
+SELECT DISTINCT ?timestamp ?datetime ?point
 WHERE{
 ?node a :RawPosition.
 ?node :ofMovingObject ?vessel .
-?node :hasTemporalFeature ?time.
-?time :TimeStart ?timestamp .
+?node :hasTemporalFeature ?timestamp.
+?timestamp :TimeStart ?datetime .
 
 ?node :hasGeometry ?geom .
 ?geom ogc:asWKT ?point .
-FILTER (?vessel = [VESSEL]).
+FILTER (?vessel = [VESSEL] && ?datetime >= [DATE_START] && ?datetime <= [DATE_END]).
 }
-ORDER BY ASC(?time)
-LIMIT 500
+ORDER BY ASC(?timestamp)
 """
 
 QUERY_INTERDICTION_AREA = """# EXPLAINATION: RETURNS VESSEL STOPPED IN AN INTERDICTION FISHING AREA

@@ -115,11 +115,31 @@ class gui():
 
         self.vesselEntry.pack(fill='x', padx=5, pady=5)
 
+
+        self.label_datetimeStart = ttk.Label(text="Start date and time (eg: 2015-09-30 22:00)", font=font.BOLD)
+        self.label_datetimeStart.pack(fill='x', padx=5, pady=5)
+
+        datetime_start = StringVar()
+
+        self.datetimeStartEntry = Entry(textvariable=datetime_start)
+
+        self.datetimeStartEntry.pack(fill='x', padx=5, pady=5)
+
+        self.label_datetimeEnd = ttk.Label(text="End date and time (eg: 2015-09-30 22:00)", font=font.BOLD)
+        self.label_datetimeEnd.pack(fill='x', padx=5, pady=5)
+
+        datetime_end = StringVar()
+
+        self.datetimeEndEntry = Entry(textvariable=datetime_end)
+
+        self.datetimeEndEntry.pack(fill='x', padx=5, pady=5)
+
+
         self.query = Button(text="Run Query", command=self.run_query, bg="lime green", fg="black", font=font.BOLD)
         self.query.pack(fill='x', padx=5, pady=5)
         self.query = Button(text="Show Query", command=self.show_query, bg="deep sky blue", fg="black", font=font.BOLD)
         self.query.pack(fill='x', padx=5, pady=5)
-        self.button_back = Button(text="Back", command=self.back, bg="white", fg="black", font=font.BOLD)
+        self.button_back = Button(text="Back", command=self.back, bg="darkgray", fg="black", font=font.BOLD)
         self.button_back.pack(fill='x', padx=5, pady=5)
 
 
@@ -131,9 +151,13 @@ class gui():
         self.root.title("Analysis of vessels activity in a protected area")
         self.label_area = ttk.Label(text="Select protected area code:", font=font.BOLD)
         self.label_area.pack(fill='x', padx=5, pady=5)
-        protected_area = ('natura_FR5302006', 'natura_FR5300019', 'natura_FR5300046', 'natura_FR5300020', 'natura_FR5302007', 'natura_FR5300021',
-                         'natura_FR5300048', 'natura_FR5300031', 'natura_FR5300059', 'natura_FR5300027', 'natura_FR5300032', 'natura_FR5300024',
-                          'natura_FR5300045', 'natura_FR5300017', 'natura_FR5300043', 'natura_FR5300009', 'natura_FR5300008')
+        protected_area = ('natura_FR5302006 = COTES DE CROZON', 'natura_FR5300019 = PRESQU\'LLE DE CROZON',
+                          'natura_FR5300046 = RADE DE BREST', 'natura_FR5300020 = CAP SIZUN', 'natura_FR5302007 = CHAUSEE DE SEIN',
+                          'natura_FR5300021 = BAIE D\'AUDIERNE', 'natura_FR5300048 = MARAIS DE MOUSTERLIN',
+                          'natura_FR5300031 = LLE DE GROIX', 'natura_FR5300059 = RIVIERE LAITA',
+                          'natura_FR5300027 = MASSIF DUNAIRE GAVRES-QUIBERON', 'natura_FR5300032 = BELLE LLE EN MER',
+                          'natura_FR5300024 = RIVIERE ELORN', 'natura_FR5300045 = POINTE DE CORSEN', 'natura_FR5300017 = ABERS',
+                          'natura_FR5300043 = GUISSENY', 'natura_FR5300009 = COTE DE GRAINT', 'natura_FR5300008 = RIVIERE LEGUER')
 
         selected_choice_protected = StringVar()
         self.protected_area_cb = ttk.Combobox(self.root, textvariable=selected_choice_protected)
@@ -167,7 +191,7 @@ class gui():
         self.query.pack(fill='x', padx=5, pady=5)
         self.query = Button(text="Show Query", command=self.show_query, bg="deep sky blue", fg="black", font=font.BOLD)
         self.query.pack(fill='x', padx=5, pady=5)
-        self.button_back = Button(text="Back", command=self.back, bg="white", fg="black", font=font.BOLD)
+        self.button_back = Button(text="Back", command=self.back, bg="darkgray", fg="black", font=font.BOLD)
         self.button_back.pack(fill='x', padx=5, pady=5)
 
     def analysis_interdiction_area(self):
@@ -188,7 +212,7 @@ class gui():
         self.query.pack(fill='x', padx=5, pady=5)
         self.query = Button(text="Show Query", command=self.show_query, bg="deep sky blue", fg="black", font=font.BOLD)
         self.query.pack(fill='x', padx=5, pady=5)
-        self.button_back = Button(text="Back", command=self.back, bg="white", fg="black", font=font.BOLD)
+        self.button_back = Button(text="Back", command=self.back, bg="darkgray", fg="black", font=font.BOLD)
         self.button_back.pack(fill='x', padx=5, pady=5)
 
     def analysis_event_per_vessel(self):
@@ -198,7 +222,6 @@ class gui():
         self.choice_cb.destroy()
         #self.event_cb.destroy()
         self.query.destroy()
-
         self.root.title("Analysis of Event per vessel")
         events = ('StoppedInit', 'StoppedEnd', 'HeadingChange', 'SpeedChangeStart', 'SpeedChangeEnd',
                   'SlowMotionStart', 'SlowMotionEnd', 'GapEnd')
@@ -225,7 +248,7 @@ class gui():
         self.query.pack(fill='x', padx=5, pady=5)
         self.query = Button(text="Show Query", command=self.show_query, bg="deep sky blue", fg="black", font=font.BOLD)
         self.query.pack(fill='x', padx=5, pady=5)
-        self.button_back = Button(text="Back", command=self.back, bg="white", fg="black",font=font.BOLD)
+        self.button_back = Button(text="Back", command=self.back, bg="darkgray", fg="black",font=font.BOLD)
         self.button_back.pack(fill='x', padx=5, pady=5)
 
     def show_query(self):
@@ -279,7 +302,7 @@ class gui():
         elif self.choice=='Vessels in protected area':
             ProtectedArea(self.protected_area_cb.get(),self.vesselEntry.get(),self.event_choices_cb.get())
         elif self.choice=='Vessel trajectory with highlighted Gap event':
-            TrajectoryAndGap(self.vesselEntry.get())
+            TrajectoryAndGap(self.vesselEntry.get(), self.datetimeStartEntry.get(), self.datetimeEndEntry.get())
 
 
     def back(self):

@@ -11,7 +11,7 @@ from explained_queries import *
 import os
 import csv
 # IP SERVER
-IP_PORT = "79.35.17.201:8890"
+IP_PORT = "87.17.92.222:8890"
 
 PATH_VESSEL_CODE = "dataset_vessel_type\\nari_static.csv"
 PATH_VESSEL_TYPE = "dataset_vessel_type\\vessel_type.CSV"
@@ -116,26 +116,33 @@ class EventForShip():
         scrollbar = Scrollbar(self.gui, orient=VERTICAL)
         scrollbar.pack(side="right", fill='y')
         text = Text(self.gui, yscrollcommand=scrollbar.set)
-        text.insert("end", self.res)
-        text.tag_config("vessel", foreground="blue")
-        # text.tag_config("prefix", foreground="orange")
-        text_search(text, "VESSEL:", "vessel",True)
+        if self.res!="":
+            text.insert("end", self.res)
+            text.tag_config("vessel", foreground="blue")
+            # text.tag_config("prefix", foreground="orange")
+            text_search(text, "VESSEL:", "vessel",True)
 
-        text.tag_config("type", foreground="blue")
-        # text.tag_config("prefix", foreground="orange")
-        text_search(text, "TYPE:", "type", True)
+            text.tag_config("type", foreground="blue")
+            # text.tag_config("prefix", foreground="orange")
+            text_search(text, "TYPE:", "type", True)
 
-        text.tag_config("event", foreground="blue")
-        # text.tag_config("prefix", foreground="orange")
-        text_search(text, "EVENT:", "event",True)
+            text.tag_config("event", foreground="blue")
+            # text.tag_config("prefix", foreground="orange")
+            text_search(text, "EVENT:", "event",True)
 
 
-        text.tag_config("occurences", foreground="blue")
-        # text.tag_config("prefix", foreground="orange")
-        text_search(text, "OCCURENCES:", "occurences", True)
+            text.tag_config("occurences", foreground="blue")
+            # text.tag_config("prefix", foreground="orange")
+            text_search(text, "OCCURENCES:", "occurences", True)
+        else:
+            text.insert("end",
+                        "There is no result for the requested query!" + "\n" + "\n" + "Try change the parameters you choose.")
 
+            text.tag_config("error", foreground="red")
+            # text.tag_config("prefix", foreground="orange")
+            text_search(text, "There", "error")
         text.configure(state=DISABLED)
-        show_query = Button(self.gui, text="Show Query", command=self.show_query)
+        show_query = Button(self.gui, text="Show Query", bg = "deep sky blue",fg="black", command=self.show_query)
         show_query.pack(fill='x', padx=5, pady=5, side=BOTTOM)
         text.pack(side="left", fill="y")
 
@@ -212,25 +219,34 @@ class InterdictionArea():
         scrollbar = Scrollbar(self.gui, orient=VERTICAL)
         scrollbar.pack(side="right", fill='y')
         text = Text(self.gui, yscrollcommand=scrollbar.set)
-        text.insert("end", self.res)
-        text.tag_config("vessel", foreground="blue")
-        # text.tag_config("prefix", foreground="orange")
-        text_search(text, "VESSEL:", "vessel", True)
+        if self.res!="":
+            text.insert("end", self.res)
+            text.tag_config("vessel", foreground="blue")
+            # text.tag_config("prefix", foreground="orange")
+            text_search(text, "VESSEL:", "vessel", True)
 
-        text.tag_config("type", foreground="blue")
-        # text.tag_config("prefix", foreground="orange")
-        text_search(text, "TYPE:", "type", True)
+            text.tag_config("type", foreground="blue")
+            # text.tag_config("prefix", foreground="orange")
+            text_search(text, "TYPE:", "type", True)
 
-        text.tag_config("date_and_time", foreground="blue")
-        # text.tag_config("prefix", foreground="orange")
-        text_search(text, "DATE and TIME:", "date_and_time", True)
+            text.tag_config("date_and_time", foreground="blue")
+            # text.tag_config("prefix", foreground="orange")
+            text_search(text, "DATE and TIME:", "date_and_time", True)
 
-        text.tag_config("point", foreground="blue")
-        # text.tag_config("prefix", foreground="orange")
-        text_search(text, "POINT:", "point", True)
+            text.tag_config("point", foreground="blue")
+            # text.tag_config("prefix", foreground="orange")
+            text_search(text, "POINT:", "point", True)
+        else:
+            text.insert("end",
+                        "There is no result for the requested query!" + "\n" + "\n" + "Try change the parameters you choose.")
+
+            text.tag_config("error", foreground="red")
+            # text.tag_config("prefix", foreground="orange")
+            text_search(text, "There", "error")
+
         text.configure(state=DISABLED)
 
-        show_query = Button(self.gui, text="Show Query", command=self.show_query)
+        show_query = Button(self.gui, text="Show Query", bg="deep sky blue", fg="black", command=self.show_query)
         show_query.pack(fill='x', padx=5, pady=5, side=BOTTOM)
         text.pack(side="left", fill="y")
 
@@ -264,11 +280,11 @@ class ProtectedArea():
         self.run_query()
 
     def run_query(self):
-        if self.protectedArea != "" and self.vessel!="" and self.event!="":
-            if self.protectedArea == "All":
+        if self.protectedArea[:16] != "" and self.vessel!="" and self.event!="":
+            if self.protectedArea[:16] == "All":
                 area_code = "?area"
             else:
-                area_code = ":" + self.protectedArea
+                area_code = ":" + self.protectedArea[:16]
             if self.vessel == "All":
                 ves = "?vessel"
             else:
@@ -281,8 +297,8 @@ class ProtectedArea():
 
             self.query_construct= PROTECTED_AREA_CONSTRUCT.replace("[AREA]",area_code)
 
-            con = ConstructQuery('http://79.35.17.201:8890/DAV/provolone', 'http://79.35.17.201:8890/sparql/',
-                                 'http://79.35.17.201:8890/sparql-auth/', 'operator',
+            con = ConstructQuery('http://'+IP_PORT+'/DAV/provolone', 'http://'+IP_PORT+'/sparql/',
+                                 'http://'+IP_PORT+'/sparql-auth/', 'operator',
                                  'operator')  # user #pw
 
             con.construct_initializer(self.query_construct)
@@ -318,30 +334,36 @@ class ProtectedArea():
     def gui_result(self):
         self.gui = Tk()
         #self.gui.geometry('700x500')
-        self.gui.title("Result of vessels activity in protected area. AREA: " +self.protectedArea
+        self.gui.title("AREA: " +self.protectedArea[19:]
                        +" - VESSEL: "+self.vessel+" - EVENT: "+self.event)
         scrollbar = Scrollbar(self.gui, orient=VERTICAL)
         scrollbar.pack(side="right", fill='y')
         text = Text(self.gui, yscrollcommand=scrollbar.set)
-        text.insert("end", self.res)
-        text.tag_config("vessel", foreground="blue")
-        # text.tag_config("prefix", foreground="orange")
-        text_search(text, "VESSEL:", "vessel", True)
+        if self.res!="":
+            text.insert("end", self.res)
+            text.tag_config("vessel", foreground="blue")
+            # text.tag_config("prefix", foreground="orange")
+            text_search(text, "VESSEL:", "vessel", True)
 
-        text.tag_config("type", foreground="blue")
-        # text.tag_config("prefix", foreground="orange")
-        text_search(text, "TYPE:", "type", True)
+            text.tag_config("type", foreground="blue")
+            # text.tag_config("prefix", foreground="orange")
+            text_search(text, "TYPE:", "type", True)
 
-        text.tag_config("event", foreground="blue")
-        # text.tag_config("prefix", foreground="orange")
-        text_search(text, "EVENT:", "event", True)
+            text.tag_config("event", foreground="blue")
+            # text.tag_config("prefix", foreground="orange")
+            text_search(text, "EVENT:", "event", True)
 
-        text.tag_config("date_and_time", foreground="blue")
-        # text.tag_config("prefix", foreground="orange")
-        text_search(text, "DATE and TIME:", "date_and_time", True)
+            text.tag_config("date_and_time", foreground="blue")
+            # text.tag_config("prefix", foreground="orange")
+            text_search(text, "DATE and TIME:", "date_and_time", True)
+        else:
+            text.insert("end", "There is no result for the requested query!"+"\n"+"\n"+"Try change the parameters you choose.")
 
+            text.tag_config("error", foreground="red")
+            # text.tag_config("prefix", foreground="orange")
+            text_search(text, "There", "error")
         text.configure(state=DISABLED)
-        show_query = Button(self.gui, text="Show Query", command=self.show_query)
+        show_query = Button(self.gui, text="Show Query", bg="deep sky blue", fg="black",command=self.show_query)
         show_query.pack(fill='x', padx=5, pady=5, side=BOTTOM)
         text.pack(side="left", fill="y")
 
@@ -377,9 +399,17 @@ YMAX = 49.9
 
 class TrajectoryAndGap():
 
-    def __init__(self, vessel):
+    def __init__(self, vessel,datetime_start,datetime_end):
         self.vessel = str(vessel)
         self.map = pltMap(XMIN, YMIN, XMAX, YMAX)
+        datetime_start = str(datetime_start).replace(" ","T")
+        datetime_start = '"'+datetime_start+":00"+'"'+"^^xsd:dateTime"
+        datetime_end = str(datetime_end).replace(" ", "T")
+        datetime_end = '"'+datetime_end + ":00"+'"'+"^^xsd:dateTime"
+        self.datetime_start = datetime_start
+        self.datetime_end = datetime_end
+        print(self.datetime_start)
+        print(self.datetime_end)
         self.run_query()
 
     def run_query(self):
@@ -415,6 +445,8 @@ class TrajectoryAndGap():
             # points = np.array(points)
 
             self.query = TRAJ_GAP_QUERY_2.replace("[VESSEL]", ves)
+            self.query = self.query.replace("[DATE_START]", self.datetime_start)
+            self.query = self.query.replace("[DATE_END]", self.datetime_end)
 
             sparql.setQuery(self.query)
             sparql.setReturnFormat(JSON)
@@ -543,7 +575,10 @@ class TrajectoryAndGap():
         img = self.map.plot_gap_points_with_traj(points=self.points_vessel, gap_points=self.gap_points)
         height, width, no_channels = img.shape
         window = Tk()
-        window.title("Trajectory. VESSEL: "+self.vessel+" TYPE: "+my_dict2(my_dict[self.vessel]))
+        try:
+            window.title("Trajectory. VESSEL: "+self.vessel+" TYPE: "+my_dict2(my_dict[self.vessel]))
+        except:
+            window.title("Trajectory. VESSEL: " + self.vessel + " TYPE: not found")
         canvas = Canvas(window, width=width, height=height)
         canvas.pack()
         photo = ImageTk.PhotoImage(master=canvas, image=Image.fromarray(img))
