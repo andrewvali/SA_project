@@ -7,12 +7,16 @@ headers = {'Content-type': 'application/json'}
 
 #CHOOSE YOUR QUERY BY COMMENTING AND UNCOMMENTING
 post_query = {'type': 'event per ship',
-              'query':{ 'vessel':'ves227443000','event':'GapEnd'}}
+              'query':{ 'vessel':'ves227443000','event':'GapEnd',
+                        'date1':'2015-09-30 22:00', 'date2':'2017-09-30 22:00'}}
 
-#post_query = {'type': 'interdiction area', 'query':{ 'vessel':'all'}}
+#post_query = {'type': 'interdiction area',
+#              'query':{ 'vessel':'all',
+#                        'date1':'2015-09-30 22:00', 'date2':'2017-09-30 22:00'}}
 
 #post_query = {'type': 'protected area',
-#              'query':{ 'vessel':'all','event':'all','protectedArea':'natura_FR5302006'}}
+#              'query':{ 'vessel':'all','event':'all','protectedArea':'natura_FR5302006',
+#                        'date1':'2015-09-30 22:00', 'date2':'2017-09-30 22:00'}}
 
 json_data = json.dumps(post_query)
 
@@ -21,3 +25,4 @@ conn.request('POST', '/post', json_data, headers)
 response = conn.getresponse()
 result_query = json.loads(response.read().decode()) #RETURNS QUERY RESULT AS A DICT
 print(result_query)
+
