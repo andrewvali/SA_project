@@ -12,8 +12,15 @@ if IP_PORT is None:
     exit(1)
 
 class HTTPRequestHandler(BaseHTTPRequestHandler):
-
+    """
+    This class is used to handle post requests server
+    """
     def do_POST(self):
+        """
+        Function called once Post service has been called by client
+        """
+
+        #Getting user data
         content_length = int(self.headers['Content-Length'])  # <--- Gets the size of data
         data_string = self.rfile.read(content_length)  # <--- Gets the data itself
 
@@ -23,6 +30,14 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
 
         json_data = json.loads(data_string.decode())
         print(str(json_data))
+
+        # Handling queries, choosing between 3 different types of queries
+        # If received data is not a correct JSON or needed input is not given
+        # it returns to client and error message with 400 as code
+        # If received data does not have an avialbel type it returns an error code
+        # with 500 as code
+
+        # Inside every if statement, code is similar to the one used in gui mode
         try:
             res = {}
             if json_data["type"] == "event per ship":
@@ -118,7 +133,7 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
                 print("SENT BACK " + str(len(res)) + " result(s)")
                 self.send_response(200)
                 to_send = {'received': 'ok', 'result': res}
-        except KeyError:
+        except (KeyError, TypeError):
             print("Wrong data passed")
             self.send_response(400)
             to_send = {"received":"error, bad data format"}
@@ -133,6 +148,11 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
 
 
     def do_query(self,query):
+        """
+        :param query: string representing query to launch
+        it returns query result dictionary
+
+        """
         sparql = SPARQLWrapper("http://" + IP_PORT + "/sparql/")
         sparql.setQuery(query)
 
@@ -141,6 +161,11 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
         return self.dict_from_query_result(result)
 
     def dict_from_query_result(self,query_data):
+        """
+        :param query_data: query result dictionary
+        it returns query result dictionary in a more clear version
+
+        """
         triples = query_data["results"]["bindings"]
         t = query_data["head"]["vars"]
         res = []
@@ -152,14 +177,17 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
         return res
 
     def datetime_from_html_to_sparql(self,datetime):
+        """
+        :param datetime: date and time string in "AAAA-MM-DD HH:MM" format
+        it returns datetime string translated in sparql standard
+
+        """
         datetime = str(datetime).replace(" ", "T")
         datetime = '"' + datetime + ":00" + '"' + "^^xsd:dateTime"
         return datetime
 
 
-
+# Initializing server and keeping it online until CTRL+C or being turned off by user
 httpd = HTTPServer(('localhost', 8000), HTTPRequestHandler)
-
 print("serving at port: 8000")
-
 httpd.serve_forever()
