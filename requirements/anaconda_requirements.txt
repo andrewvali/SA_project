@@ -1,0 +1,9 @@
+conda create -n aware python=3.8 anaconda 
+conda activate aware 
+conda install -n aware matplotlib  
+conda install -c conda-forge basemap 
+conda install -n aware numpy 
+conda install -n aware basemap-data-hires
+conda install -c anaconda requests
+conda install -c conda-forge rdflib
+pip install opencv-python (sulla console dell'IDE)
