@@ -151,4 +151,4 @@ PROTECTED_AREA_QUERY = """
 SELECT DISTINCT ?vessel ?event ?date 
 WHERE {
 ?vessel ?event ?date.
-FILTER(?vessel= [VESSEL] && ?event= [EVENT]).}"""
+FILTER(?vessel= [VESSEL] && ?event= [EVENT] && ?date>=[DATE_START] && ?date<=[DATE_END]).}"""

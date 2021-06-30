@@ -306,9 +306,16 @@ class InterdictionArea():
         text.pack(side="left", fill="y")
 
 class ProtectedArea():
-    def __init__(self,protected_area_code,vessel,event):
+    def __init__(self,protected_area_code,vessel,event,datetime_start, datetime_end):
         self.protectedArea = str(protected_area_code)
-        #self.map = pltMap(XMIN, YMIN, XMAX, YMAX)
+        datetime_start = str(datetime_start).replace(" ", "T")
+        datetime_start = '"' + datetime_start + ":00" + '"' + "^^xsd:dateTime"
+        datetime_end = str(datetime_end).replace(" ", "T")
+        datetime_end = '"' + datetime_end + ":00" + '"' + "^^xsd:dateTime"
+        self.datetime_start = datetime_start
+        self.datetime_end = datetime_end
+        print(self.datetime_start)
+        print(self.datetime_end)
         self.vessel = str(vessel)
         self.event = str(event)
         self.run_query()
@@ -339,7 +346,7 @@ class ProtectedArea():
 
             self.area_query = PROTECTED_AREA_QUERY.replace("[VESSEL]",ves).replace("[EVENT]",eve)
 
-
+            self.area_query = self.area_query.replace("[DATE_START]",self.datetime_start).replace("[DATE_END]",self.datetime_end)
             result = con.construct_query(self.area_query)
 
             triples = result["results"]["bindings"]
@@ -374,7 +381,13 @@ class ProtectedArea():
         scrollbar.pack(side="right", fill='y')
         text = Text(self.gui, yscrollcommand=scrollbar.set)
         if self.res!="":
-            text.insert("end", self.res)
+            text.insert("end", "TIME INTERVAL: " + self.datetime_start[1:17].replace("T", " ") +
+                        " / " + self.datetime_end[1:17].replace("T", " ") + "\n" + "\n" + self.res)
+
+            text.tag_config("time_interval", foreground="blue")
+            # text.tag_config("prefix", foreground="orange")
+            text_search(text, "TIME INTERVAL:", "time_interval", True)
+
             text.tag_config("vessel", foreground="blue")
             # text.tag_config("prefix", foreground="orange")
             text_search(text, "VESSEL:", "vessel", True)
