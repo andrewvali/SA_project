@@ -130,7 +130,7 @@ class gui():
         # self.event_cb.destroy()
         self.query.destroy()
         self.root.title("Analysis of vessels trajectory")
-        self.label_vessel = ttk.Label(text="Write vessel code:", font=font.BOLD)
+        self.label_vessel = ttk.Label(text="Write vessel MMSI:", font=font.BOLD)
         self.label_vessel.pack(fill='x', padx=5, pady=5)
         vessel = StringVar()
 
@@ -194,7 +194,7 @@ class gui():
         self.protected_area_cb.pack(fill='x', padx=5, pady=5)
         self.protected_area_cb.bind('<<ComboboxSelected>>')
 
-        self.label_vessel = ttk.Label(text="Write vessel code (write 'All' for every vessel): ", font=font.BOLD)
+        self.label_vessel = ttk.Label(text="Write vessel MMSI (write 'All' for every vessel): ", font=font.BOLD)
         self.label_vessel.pack(fill='x', padx=5, pady=5)
 
         vessel = StringVar()
@@ -250,7 +250,7 @@ class gui():
         # self.event_cb.destroy()
         self.query.destroy()
         self.root.title("Analysis of vessels sopped in interdicted fishing area")
-        self.label_vessel = ttk.Label(text="Write vessel code (write 'All' for every vessel): ", font=font.BOLD)
+        self.label_vessel = ttk.Label(text="Write vessel MMSI (write 'All' for every vessel): ", font=font.BOLD)
         self.label_vessel.pack(fill='x', padx=5, pady=5)
         vessel = StringVar()
 
@@ -297,7 +297,7 @@ class gui():
         events = ('All','StoppedInit', 'StoppedEnd', 'HeadingChange', 'SpeedChangeStart', 'SpeedChangeEnd',
                   'SlowMotionStart', 'SlowMotionEnd', 'GapEnd')
 
-        self.label_vessel = ttk.Label(text="Write vessel code (write 'All' for every vessel): ", font=font.BOLD)
+        self.label_vessel = ttk.Label(text="Write vessel MMSI (write 'All' for every vessel): ", font=font.BOLD)
         self.label_vessel.pack(fill='x', padx=5, pady=5)
         vessel = StringVar()
 

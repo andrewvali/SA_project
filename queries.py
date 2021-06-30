@@ -35,7 +35,7 @@ my_dict = {}
 with open(os.path.abspath(PATH_VESSEL_CODE) ,mode="r") as csv_file:
     csv_reader = csv.reader((csv_file), delimiter=",")
     for row in csv_reader:
-        my_dict["ves"+row[0]] = row[4]
+        my_dict[row[0]] = row[4]
 
 """
 This dict will be formed by:
@@ -113,12 +113,15 @@ class EventForShip():
         :param datetime_start: start date chosen by user
         :param datetime_end: end date chosen by user
         """
-        if check_parameters(datetime_start,datetime_end):
-            self.event = str(event)
-            self.vessel = str(vessel)
-            self.datetime_start=datetime_convert(datetime_start)
-            self.datetime_end = datetime_convert(datetime_end)
-            self.run_query()
+        if str(event) != "" and str(datetime_start)!="" and str(datetime_end)!="":
+            if check_parameters(datetime_start,datetime_end,vessel):
+                self.event = str(event)
+                self.vessel = str(vessel)
+                self.datetime_start=datetime_convert(datetime_start)
+                self.datetime_end = datetime_convert(datetime_end)
+                self.run_query()
+        else:
+            showinfo('Warning!', 'Complete all fields! ')
 
 
     def run_query(self):
@@ -126,42 +129,39 @@ class EventForShip():
         This function is called to run the query. It replaces the parameters chosen by user in the basic query.
         The query result is obtained by server and it calls the gui_result function to show the result.
         """
-        if self.event != "" and self.vessel != "":
-            if self.vessel == "All":
-                ves = "?vessel"
-            else:
-                ves = ":" + self.vessel
-            if self.event=="All":
-                self.event="?event"
-            else:
-                self.event=":"+self.event
-            print(self.event)
-            sparql = SPARQLWrapper("http://"+IP_PORT+"/sparql/")
 
-            self.query = EVENT_FOR_SHIP_QUERY.replace("[EVENT]",self.event).replace("[VESSEL]",ves)
-            self.query = self.query.replace("[DATE_START]",self.datetime_start).replace("[DATE_END]",self.datetime_end)
-
-            sparql.setQuery(self.query)
-
-            sparql.setReturnFormat(JSON)
-            result = sparql.query().convert()
-            triples = result["results"]["bindings"]
-            t = result["head"]["vars"]
-            self.res = ""
-            for triple in triples:
-                msg = ""
-                for i in t:
-                    msg += " " + str(triple[i]["value"]).split("/")[-1].split("#")[-1]
-                msg = msg.split(" ")
-                try:
-                    self.res += "VESSEL: "+msg[1]+" TYPE: "+my_dict2[my_dict[msg[1]]]+"\n" +" EVENT: "+msg[2]+" OCCURENCES: "+msg[3]+ "\n" +"\n"
-                except:
-                    self.res += "VESSEL: "+msg[1]+"\n"+"TYPE: not found"+" EVENT: "+msg[2]+" OCCURENCES: "+msg[3]+ "\n"+"\n"
-
-
-            self.gui_result()
+        if self.vessel == "All":
+            ves = "?vessel"
         else:
-            showinfo('Warning!', 'Complete all fields! ')
+            ves = ":ves" + self.vessel
+        if self.event=="All":
+            self.event="?event"
+        else:
+            self.event=":"+self.event
+        print(self.event)
+        sparql = SPARQLWrapper("http://"+IP_PORT+"/sparql/")
+
+        self.query = EVENT_FOR_SHIP_QUERY.replace("[EVENT]",self.event).replace("[VESSEL]",ves)
+        self.query = self.query.replace("[DATE_START]",self.datetime_start).replace("[DATE_END]",self.datetime_end)
+
+        sparql.setQuery(self.query)
+
+        sparql.setReturnFormat(JSON)
+        result = sparql.query().convert()
+        triples = result["results"]["bindings"]
+        t = result["head"]["vars"]
+        self.res = ""
+        for triple in triples:
+            msg = ""
+            for i in t:
+                msg += " " + str(triple[i]["value"]).split("/")[-1].split("#")[-1]
+            msg = msg.split(" ")
+            try:
+                self.res += "VESSEL MMSI: "+msg[1][3:]+" TYPE: "+my_dict2[my_dict[msg[1][3:]]]+"\n" +" EVENT: "+msg[2]+" OCCURENCES: "+msg[3]+ "\n" +"\n"
+            except:
+                self.res += "VESSEL MMSI: "+msg[1][3:]+"\n"+"TYPE: not found"+" EVENT: "+msg[2]+" OCCURENCES: "+msg[3]+ "\n"+"\n"
+
+        self.gui_result()
 
     def gui_result(self):
         """
@@ -181,9 +181,9 @@ class EventForShip():
             # text.tag_config("prefix", foreground="orange")
             text_search(text, "TIME INTERVAL:", "time_interval", True)
 
-            text.tag_config("vessel", foreground="blue")
+            text.tag_config("vessel_mmsi", foreground="blue")
             # text.tag_config("prefix", foreground="orange")
-            text_search(text, "VESSEL:", "vessel",True)
+            text_search(text, "VESSEL MMSI:", "vessel_mmsi",True)
 
             text.tag_config("type", foreground="blue")
             # text.tag_config("prefix", foreground="orange")
@@ -246,52 +246,53 @@ class InterdictionArea():
         :param datetime_start: start date chosen by user
         :param datetime_end: end date chosen by user
         """
-        if (check_parameters(datetime_start, datetime_end)):
-            self.vessel = str(vessel)
-            self.datetime_start = datetime_convert(datetime_start)
-            self.datetime_end = datetime_convert(datetime_end)
-            self.run_query()
+        if str(vessel)!="" and str(datetime_start)!="" and str(datetime_end)!="":
+            if check_parameters(datetime_start,datetime_end,vessel):
+                self.vessel = str(vessel)
+                self.datetime_start = datetime_convert(datetime_start)
+                self.datetime_end = datetime_convert(datetime_end)
+                self.run_query()
+        else:
+            showinfo('Warning!', 'Complete all fields! ')
 
     def run_query(self):
         """
         This function is called to run the query. It replaces the parameters chosen by user in the basic query.
         The query result is obtained by server and it calls the gui_result function to show the result.
         """
-        if self.vessel != "":
-            if self.vessel == "All":
-                ves = "?vessel"
-            else:
-                ves = ":" + self.vessel
-            sparql = SPARQLWrapper("http://"+IP_PORT+"/sparql/")
-            #sparql.setTimeout(30)
 
-            self.query = QUERY_INTERDICTION_AREA.replace("[VESSEL]", ves)
-            self.query = self.query.replace("[DATE_START]",self.datetime_start).replace("[DATE_END]",self.datetime_end)
-            sparql.setQuery(self.query)
-
-            sparql.setReturnFormat(JSON)
-            result = sparql.query().convert()
-            triples = result["results"]["bindings"]
-            t = result["head"]["vars"]
-            self.res = ""
-            #points = []
-            for triple in triples:
-                msg = ""
-                for i in t:
-                    msg += " " + str(triple[i]["value"]).split("/")[-1].split("#")[-1]
-                #points.append([float(coord) for coord in msg.split(";")[-1].split("(")[-1].split(")")[0].split(" ")])
-                msg = msg.replace("T"," ")
-                msg = msg.replace("POIN","POINT:")
-                msg = msg.replace("SRID=4322;","")
-                msg = msg.split(" ")
-                try:
-                    self.res += "VESSEL: "+ msg[1]+" TYPE: "+my_dict2[my_dict[msg[1]]]+"\n"+" DATE and TIME: "+msg[2]+" "+msg[3]+" "+msg[4]+" "+msg[5]+ " "+msg[6]+"\n" +"\n"
-                except:
-                    self.res += "VESSEL: " + msg[1] + " TYPE: not found" + "\n" + " DATE and TIME: " + \
-                                msg[2] + " " + msg[3] + " " + msg[4] + " " + msg[5] + " "+msg[6]+ "\n" + "\n"
-            self.gui_result()
+        if self.vessel == "All":
+            ves = "?vessel"
         else:
-            showinfo('Warning!', 'Complete all fields! ')
+            ves = ":ves" + self.vessel
+        sparql = SPARQLWrapper("http://"+IP_PORT+"/sparql/")
+        #sparql.setTimeout(30)
+
+        self.query = QUERY_INTERDICTION_AREA.replace("[VESSEL]", ves)
+        self.query = self.query.replace("[DATE_START]",self.datetime_start).replace("[DATE_END]",self.datetime_end)
+        sparql.setQuery(self.query)
+
+        sparql.setReturnFormat(JSON)
+        result = sparql.query().convert()
+        triples = result["results"]["bindings"]
+        t = result["head"]["vars"]
+        self.res = ""
+        #points = []
+        for triple in triples:
+            msg = ""
+            for i in t:
+                msg += " " + str(triple[i]["value"]).split("/")[-1].split("#")[-1]
+            #points.append([float(coord) for coord in msg.split(";")[-1].split("(")[-1].split(")")[0].split(" ")])
+            msg = msg.replace("T"," ")
+            msg = msg.replace("POIN","POINT:")
+            msg = msg.replace("SRID=4322;","")
+            msg = msg.split(" ")
+            try:
+                self.res += "VESSEL MMSI: "+ msg[1][3:]+" TYPE: "+my_dict2[my_dict[msg[1][3:]]]+"\n"+" DATE and TIME: "+msg[2]+" "+msg[3]+" "+msg[4]+" "+msg[5]+ " "+msg[6]+"\n" +"\n"
+            except:
+                self.res += "VESSEL MMSI: " + msg[1][3:] + " TYPE: not found" + "\n" + " DATE and TIME: " + \
+                            msg[2] + " " + msg[3] + " " + msg[4] + " " + msg[5] + " "+msg[6]+ "\n" + "\n"
+        self.gui_result()
 
     def gui_result(self):
         """
@@ -299,7 +300,7 @@ class InterdictionArea():
         """
         self.gui = Tk()
         #self.gui.geometry('700x500')
-        self.gui.title("Result of events in an interdicted fishing area. VESSEL: " +self.vessel)
+        self.gui.title("Result of events in an interdicted fishing area. MMSI: " +self.vessel)
         scrollbar = Scrollbar(self.gui, orient=VERTICAL)
         scrollbar.pack(side="right", fill='y')
         text = Text(self.gui, yscrollcommand=scrollbar.set)
@@ -313,7 +314,7 @@ class InterdictionArea():
             text_search(text, "TIME INTERVAL:", "time_interval", True)
             text.tag_config("vessel", foreground="blue")
             # text.tag_config("prefix", foreground="orange")
-            text_search(text, "VESSEL:", "vessel", True)
+            text_search(text, "VESSEL MMSI:", "vessel", True)
 
             text.tag_config("type", foreground="blue")
             # text.tag_config("prefix", foreground="orange")
@@ -377,13 +378,16 @@ class ProtectedArea():
         :param datetime_start: start date chosen by user
         :param datetime_end: end date chosen by user
         """
-        if (check_parameters(datetime_start, datetime_end)):
-            self.protectedArea = str(protected_area_code)
-            self.datetime_start = datetime_convert(datetime_start)
-            self.datetime_end = datetime_convert(datetime_end)
-            self.vessel = str(vessel)
-            self.event = str(event)
-            self.run_query()
+        if str(datetime_start)!="" and str(datetime_end) and str(vessel)!="":
+            if check_parameters(datetime_start,datetime_end,vessel):
+                self.protectedArea = str(protected_area_code)
+                self.datetime_start = datetime_convert(datetime_start)
+                self.datetime_end = datetime_convert(datetime_end)
+                self.vessel = str(vessel)
+                self.event = str(event)
+                self.run_query()
+        else:
+            showinfo('Warning!', 'Complete all fields! ')
 
     def run_query(self):
         """
@@ -391,56 +395,54 @@ class ProtectedArea():
         The query result is obtained by server and it calls the gui_result function to show the result.
         It is launched construct query and then another query on triples generated by construct
         """
-        if self.protectedArea[:16] != "" and self.vessel!="" and self.event!="":
-            if self.protectedArea[:16] == "All":
-                area_code = "?area"
-            else:
-                area_code = ":" + self.protectedArea[:16]
-            if self.vessel == "All":
-                ves = "?vessel"
-            else:
-                ves = ":" + self.vessel
-            if self.event=="All":
-                eve = "?event"
-            else:
-                eve = ":" + self.event
-            sparql = SPARQLWrapper("http://" + IP_PORT + "/sparql/")
 
-            self.query_construct= PROTECTED_AREA_CONSTRUCT.replace("[AREA]",area_code)
-
-            con = ConstructQuery('http://'+IP_PORT+'/DAV/contructeDataset', 'http://'+IP_PORT+'/sparql/',
-                                 'http://'+IP_PORT+'/sparql-auth/', 'operator',
-                                 'operator')  # user #pw
-
-            con.construct_initializer(self.query_construct)
-
-            self.area_query = PROTECTED_AREA_QUERY.replace("[VESSEL]",ves).replace("[EVENT]",eve)
-
-            self.area_query = self.area_query.replace("[DATE_START]",self.datetime_start).replace("[DATE_END]",self.datetime_end)
-            result = con.construct_query(self.area_query)
-
-            triples = result["results"]["bindings"]
-            #triples.sort(key=lambda x:x['o']['value'])
-            t = result["head"]["vars"]
-            self.res = ""
-            for triple in triples:
-                msg = ""
-                for i in t:
-                    print(msg)
-                    msg += " " + str(triple[i]["value"]).split("/")[-1].split("#")[-1]
-                msg = msg.replace("T"," ")
-                msg = msg.split(" ")
-
-                try:
-                    self.res += "VESSEL: "+ msg[1]+" TYPE: "+my_dict2[my_dict[msg[1]]]+"\n"+" EVENT: "+msg[2]+" DATE and TIME: "+msg[3]+" " +msg[4]+ "\n"+"\n"
-                except:
-                    self.res += "VESSEL: "+ msg[1]+" TYPE: not found"+"\n"+" EVENT: "+msg[2]+" DATE and TIME: "+msg[3]+" " +msg[4]+ "\n"+"\n"
-
-            #self.res = self.res.replace("T"," ")
-
-            self.gui_result()
+        if self.protectedArea[:16] == "All":
+            area_code = "?area"
         else:
-            showinfo('Warning!', 'Complete all fields! ')
+            area_code = ":" + self.protectedArea[:16]
+        if self.vessel == "All":
+            ves = "?vessel"
+        else:
+            ves = ":ves" + self.vessel
+        if self.event=="All":
+            eve = "?event"
+        else:
+            eve = ":" + self.event
+        sparql = SPARQLWrapper("http://" + IP_PORT + "/sparql/")
+
+        self.query_construct= PROTECTED_AREA_CONSTRUCT.replace("[AREA]",area_code)
+
+        con = ConstructQuery('http://'+IP_PORT+'/DAV/contructeDataset', 'http://'+IP_PORT+'/sparql/',
+                             'http://'+IP_PORT+'/sparql-auth/', 'operator',
+                             'operator')  # user #pw
+
+        con.construct_initializer(self.query_construct)
+
+        self.area_query = PROTECTED_AREA_QUERY.replace("[VESSEL]",ves).replace("[EVENT]",eve)
+
+        self.area_query = self.area_query.replace("[DATE_START]",self.datetime_start).replace("[DATE_END]",self.datetime_end)
+        result = con.construct_query(self.area_query)
+
+        triples = result["results"]["bindings"]
+        #triples.sort(key=lambda x:x['o']['value'])
+        t = result["head"]["vars"]
+        self.res = ""
+        for triple in triples:
+            msg = ""
+            for i in t:
+                print(msg)
+                msg += " " + str(triple[i]["value"]).split("/")[-1].split("#")[-1]
+            msg = msg.replace("T"," ")
+            msg = msg.split(" ")
+
+            try:
+                self.res += "VESSEL MMSI: "+ msg[1][3:]+" TYPE: "+my_dict2[my_dict[msg[1][3:]]]+"\n"+" EVENT: "+msg[2]+" DATE and TIME: "+msg[3]+" " +msg[4]+ "\n"+"\n"
+            except:
+                self.res += "VESSEL MMSI: "+ msg[1][3:]+" TYPE: not found"+"\n"+" EVENT: "+msg[2]+" DATE and TIME: "+msg[3]+" " +msg[4]+ "\n"+"\n"
+
+        #self.res = self.res.replace("T"," ")
+
+        self.gui_result()
 
     def gui_result(self):
         """
@@ -449,7 +451,7 @@ class ProtectedArea():
         self.gui = Tk()
         #self.gui.geometry('700x500')
         self.gui.title("AREA: " +self.protectedArea[19:]
-                       +" - VESSEL: "+self.vessel+" - EVENT: "+self.event)
+                       +" - MMSI: "+self.vessel+" - EVENT: "+self.event)
         scrollbar = Scrollbar(self.gui, orient=VERTICAL)
         scrollbar.pack(side="right", fill='y')
         text = Text(self.gui, yscrollcommand=scrollbar.set)
@@ -463,7 +465,7 @@ class ProtectedArea():
 
             text.tag_config("vessel", foreground="blue")
             # text.tag_config("prefix", foreground="orange")
-            text_search(text, "VESSEL:", "vessel", True)
+            text_search(text, "VESSEL MMSI:", "vessel", True)
 
             text.tag_config("type", foreground="blue")
             # text.tag_config("prefix", foreground="orange")
@@ -531,121 +533,121 @@ class TrajectoryAndGap():
         :param datetime_start: start date chosen by user
         :param datetime_end: end date chosen by user
         """
-        if (check_parameters(datetime_start, datetime_end)):
-            self.vessel = str(vessel)
-            self.map = pltMap(XMIN, YMIN, XMAX, YMAX)
-            self.datetime_start = datetime_convert(datetime_start)
-            self.datetime_end = datetime_convert(datetime_end)
-            self.run_query()
+        if str(vessel)!="" and str(datetime_start)!="" and str(vessel)!="":
+            if check_parameters(datetime_start, datetime_end, vessel):
+                self.vessel = str(vessel)
+                self.map = pltMap(XMIN, YMIN, XMAX, YMAX)
+                self.datetime_start = datetime_convert(datetime_start)
+                self.datetime_end = datetime_convert(datetime_end)
+                self.run_query()
+        else:
+            showinfo('Warning!', 'Complete all fields! ')
 
     def run_query(self):
         """
         This function is called to run the query. It replaces the parameters chosen by user in the basic query.
         The query result is obtained by server and it calls the gui_result function to show the result.
         """
-        if self.vessel != "":
-            if self.vessel == "All":
-                ves = "?vessel"
-            else:
-                ves = ":" + self.vessel
-            sparql = SPARQLWrapper("http://" + IP_PORT + "/sparql/")
 
-            sparql.setQuery(TRAJ_GAP_QUERY_1)
-
-            sparql.setReturnFormat(JSON)
-            result = sparql.query().convert()
-            triples = result["results"]["bindings"]
-            t = result["head"]["vars"]
-            result = ""
-
-            # points list contains the position of all ports
-            points = []
-
-            for triple in triples:
-                msg = ""
-                for i in t:
-                    msg += " " + str(triple[i]["value"]).split("/")[-1].split("#")[-1]
-                    c = msg.split("(")
-                    c = c[1].split(" ")
-                    points.append((float(c[0]), float(c[1][:-1])))
-                # points.append([float(coord) for coord in msg.split(";")[-1].split("(")[-1].split(")")[0].split(" ")])
-
-                result += msg + "\n"
-
-            # print(points)
-
-            # points = np.array(points)
-
-            self.query = TRAJ_GAP_QUERY_2.replace("[VESSEL]", ves)
-            self.query = self.query.replace("[DATE_START]", self.datetime_start)
-            self.query = self.query.replace("[DATE_END]", self.datetime_end)
-
-            sparql.setQuery(self.query)
-            sparql.setReturnFormat(JSON)
-            result = sparql.query().convert()
-            triples = result["results"]["bindings"]
-            t = result["head"]["vars"]
-            self.result = ""
-
-            # points_vessel contains all points of vessel trajectory
-            self.points_vessel = []
-
-            #timestamp_vessel_point contains the timestamp of each point
-            timestamp_vessel_point = []
-
-            for triple in triples:
-                msg = ""
-                for i in t:
-                    msg += " " + str(triple[i]["value"]).split("/")[-1].split("#")[-1]
-                c = msg.split(" ")
-                c = c[1].split("t")
-                m = msg
-                m = m.replace("T", " ")
-                m = m.replace("POIN", "POINT:")
-                m = m.replace("SRID=4322;", "")
-                m = m.split(" ")
-                self.result += "DATE and TIME: "+m[3]+" "+m[4]+" "+m[5]+" "+m[6]+"\n"
-
-                timestamp_vessel_point.append(int(c[1]))
-                self.points_vessel.append(
-                    [float(coord) for coord in msg.split(";")[-1].split("(")[-1].split(")")[0].split(" ")])
-
-
-            R = 6373.0
-
-            # This list contains all distance between vessel and nearest port
-            dist = []
-            self.gap_points = []
-            k = 0
-            for i in range(0, len(timestamp_vessel_point) - 1):
-                for p in points:
-                    lat1 = radians(self.points_vessel[i][0])
-                    lon1 = radians(self.points_vessel[i][1])
-                    lat2 = radians(p[0])
-                    lon2 = radians(p[1])
-                    dlon = lon2 - lon1
-                    dlat = lat2 - lat1
-                    a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
-                    c = 2 * atan2(sqrt(a), sqrt(1 - a))
-                    dist.append(R * c)
-
-                # if the min distance is less than 5 km and more than half an hour has passed
-                # between two successive communications, the gap event is not detected
-                if min(dist) < 2 and abs(timestamp_vessel_point[i] - timestamp_vessel_point[i + 1]) >= 500000:
-                    print(self.points_vessel[i], points[dist.index(min(dist))])
-                    print("NO Event Gap")
-
-                # if the min distance is greater than 5 km and more than half an hour has passed
-                # between two successive communications, the gap event is detected
-                elif min(dist) > 2 and abs(timestamp_vessel_point[i] - timestamp_vessel_point[i + 1]) >= 500000:
-                    print("YES Event Gap")
-                    self.gap_points.append(self.points_vessel[i])
-                    self.gap_points.append(self.points_vessel[i + 1])
-
-            self.show_map()
-
+        if self.vessel == "All":
+            ves = "?vessel"
         else:
-            showinfo('Warning!', 'Complete all fields! ')
+            ves = ":ves" + self.vessel
+        sparql = SPARQLWrapper("http://" + IP_PORT + "/sparql/")
+
+        sparql.setQuery(TRAJ_GAP_QUERY_1)
+
+        sparql.setReturnFormat(JSON)
+        result = sparql.query().convert()
+        triples = result["results"]["bindings"]
+        t = result["head"]["vars"]
+        result = ""
+
+        # points list contains the position of all ports
+        points = []
+
+        for triple in triples:
+            msg = ""
+            for i in t:
+                msg += " " + str(triple[i]["value"]).split("/")[-1].split("#")[-1]
+                c = msg.split("(")
+                c = c[1].split(" ")
+                points.append((float(c[0]), float(c[1][:-1])))
+            # points.append([float(coord) for coord in msg.split(";")[-1].split("(")[-1].split(")")[0].split(" ")])
+
+            result += msg + "\n"
+
+        # print(points)
+
+        # points = np.array(points)
+
+        self.query = TRAJ_GAP_QUERY_2.replace("[VESSEL]", ves)
+        self.query = self.query.replace("[DATE_START]", self.datetime_start)
+        self.query = self.query.replace("[DATE_END]", self.datetime_end)
+
+        sparql.setQuery(self.query)
+        sparql.setReturnFormat(JSON)
+        result = sparql.query().convert()
+        triples = result["results"]["bindings"]
+        t = result["head"]["vars"]
+        self.result = ""
+
+        # points_vessel contains all points of vessel trajectory
+        self.points_vessel = []
+
+        #timestamp_vessel_point contains the timestamp of each point
+        timestamp_vessel_point = []
+
+        for triple in triples:
+            msg = ""
+            for i in t:
+                msg += " " + str(triple[i]["value"]).split("/")[-1].split("#")[-1]
+            c = msg.split(" ")
+            c = c[1].split("t")
+            m = msg
+            m = m.replace("T", " ")
+            m = m.replace("POIN", "POINT:")
+            m = m.replace("SRID=4322;", "")
+            m = m.split(" ")
+            self.result += "DATE and TIME: "+m[3]+" "+m[4]+" "+m[5]+" "+m[6]+"\n"
+
+            timestamp_vessel_point.append(int(c[1]))
+            self.points_vessel.append(
+                [float(coord) for coord in msg.split(";")[-1].split("(")[-1].split(")")[0].split(" ")])
+
+
+        R = 6373.0
+
+        # This list contains all distance between vessel and nearest port
+        dist = []
+        self.gap_points = []
+        k = 0
+        for i in range(0, len(timestamp_vessel_point) - 1):
+            for p in points:
+                lat1 = radians(self.points_vessel[i][0])
+                lon1 = radians(self.points_vessel[i][1])
+                lat2 = radians(p[0])
+                lon2 = radians(p[1])
+                dlon = lon2 - lon1
+                dlat = lat2 - lat1
+                a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
+                c = 2 * atan2(sqrt(a), sqrt(1 - a))
+                dist.append(R * c)
+
+            # if the min distance is less than 5 km and more than half an hour has passed
+            # between two successive communications, the gap event is not detected
+            if min(dist) < 2 and abs(timestamp_vessel_point[i] - timestamp_vessel_point[i + 1]) >= 500000:
+                print(self.points_vessel[i], points[dist.index(min(dist))])
+                print("NO Event Gap")
+
+            # if the min distance is greater than 5 km and more than half an hour has passed
+            # between two successive communications, the gap event is detected
+            elif min(dist) > 2 and abs(timestamp_vessel_point[i] - timestamp_vessel_point[i + 1]) >= 500000:
+                print("YES Event Gap")
+                self.gap_points.append(self.points_vessel[i])
+                self.gap_points.append(self.points_vessel[i + 1])
+
+        self.show_map()
 
     def gui_result(self):
         """
@@ -694,7 +696,7 @@ class TrajectoryAndGap():
             self.show_map()
         self.gui = Tk()
         #self.gui.geometry('700x500')
-        self.gui.title("Query of vessel trajectory with highlighted Gap event. VESSEL: "+self.vessel)
+        self.gui.title("Query of vessel trajectory with highlighted Gap event. MMSI: "+self.vessel)
         scrollbar = Scrollbar(self.gui, orient=VERTICAL)
         scrollbar.pack(side="right", fill='y')
         text = Text(self.gui, yscrollcommand=scrollbar.set)
@@ -732,9 +734,9 @@ class TrajectoryAndGap():
         height, width, no_channels = img.shape
         window = Tk()
         try:
-            window.title("Trajectory. VESSEL: "+self.vessel+" TYPE: "+my_dict2(my_dict[self.vessel]))
+            window.title("Trajectory. MMSI: "+self.vessel+" TYPE: "+my_dict2[my_dict[self.vessel]])
         except:
-            window.title("Trajectory. VESSEL: " + self.vessel + " TYPE: not found")
+            window.title("Trajectory. MMSI: " + self.vessel + " TYPE: not found")
         canvas = Canvas(window, width=width, height=height)
         canvas.pack()
         photo = ImageTk.PhotoImage(master=canvas, image=Image.fromarray(img))
@@ -772,7 +774,7 @@ def datetime_convert(datetime):
     print(datetime)
     return datetime
 
-def check_parameters(datetime_start,datetime_end):
+def check_parameters(datetime_start,datetime_end, vessel_mmsi):
     try:
         datetime.datetime.strptime(str(datetime_start), "%Y-%m-%d %H:%M")
     except:
@@ -782,6 +784,10 @@ def check_parameters(datetime_start,datetime_end):
         datetime.datetime.strptime(str(datetime_end), "%Y-%m-%d %H:%M")
     except:
         showinfo("Warning", "End date incorrect form!")
+        return False
+
+    if str(vessel_mmsi)!="All" and (len(str(vessel_mmsi))!=9 or not str(vessel_mmsi).isdigit()):
+        showinfo("Warning", "Vessel MMSI incorrect form!")
         return False
 
     return True
