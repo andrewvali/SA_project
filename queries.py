@@ -10,6 +10,7 @@ from math import *
 from explained_queries import *
 import os
 import csv
+import datetime
 
 # IP SERVER
 with open('Address Settings.txt') as f:
@@ -112,11 +113,13 @@ class EventForShip():
         :param datetime_start: start date chosen by user
         :param datetime_end: end date chosen by user
         """
-        self.event = str(event)
-        self.vessel = str(vessel)
-        self.datetime_start=datetime_convert(datetime_start)
-        self.datetime_end = datetime_convert(datetime_end)
-        self.run_query()
+        if check_parameters(datetime_start,datetime_end):
+            self.event = str(event)
+            self.vessel = str(vessel)
+            self.datetime_start=datetime_convert(datetime_start)
+            self.datetime_end = datetime_convert(datetime_end)
+            self.run_query()
+
 
     def run_query(self):
         """
@@ -243,10 +246,11 @@ class InterdictionArea():
         :param datetime_start: start date chosen by user
         :param datetime_end: end date chosen by user
         """
-        self.vessel = str(vessel)
-        self.datetime_start = datetime_convert(datetime_start)
-        self.datetime_end = datetime_convert(datetime_end)
-        self.run_query()
+        if (check_parameters(datetime_start, datetime_end)):
+            self.vessel = str(vessel)
+            self.datetime_start = datetime_convert(datetime_start)
+            self.datetime_end = datetime_convert(datetime_end)
+            self.run_query()
 
     def run_query(self):
         """
@@ -373,12 +377,13 @@ class ProtectedArea():
         :param datetime_start: start date chosen by user
         :param datetime_end: end date chosen by user
         """
-        self.protectedArea = str(protected_area_code)
-        self.datetime_start = datetime_convert(datetime_start)
-        self.datetime_end = datetime_convert(datetime_end)
-        self.vessel = str(vessel)
-        self.event = str(event)
-        self.run_query()
+        if (check_parameters(datetime_start, datetime_end)):
+            self.protectedArea = str(protected_area_code)
+            self.datetime_start = datetime_convert(datetime_start)
+            self.datetime_end = datetime_convert(datetime_end)
+            self.vessel = str(vessel)
+            self.event = str(event)
+            self.run_query()
 
     def run_query(self):
         """
@@ -526,11 +531,12 @@ class TrajectoryAndGap():
         :param datetime_start: start date chosen by user
         :param datetime_end: end date chosen by user
         """
-        self.vessel = str(vessel)
-        self.map = pltMap(XMIN, YMIN, XMAX, YMAX)
-        self.datetime_start = datetime_convert(datetime_start)
-        self.datetime_end = datetime_convert(datetime_end)
-        self.run_query()
+        if (check_parameters(datetime_start, datetime_end)):
+            self.vessel = str(vessel)
+            self.map = pltMap(XMIN, YMIN, XMAX, YMAX)
+            self.datetime_start = datetime_convert(datetime_start)
+            self.datetime_end = datetime_convert(datetime_end)
+            self.run_query()
 
     def run_query(self):
         """
@@ -765,3 +771,17 @@ def datetime_convert(datetime):
     datetime = '"' + datetime + ":00" + '"' + "^^xsd:dateTime"
     print(datetime)
     return datetime
+
+def check_parameters(datetime_start,datetime_end):
+    try:
+        datetime.datetime.strptime(str(datetime_start), "%Y-%m-%d %H:%M")
+    except:
+        showinfo("Warning", "Start date incorrect form!")
+        return False
+    try:
+        datetime.datetime.strptime(str(datetime_end), "%Y-%m-%d %H:%M")
+    except:
+        showinfo("Warning", "End date incorrect form!")
+        return False
+
+    return True
