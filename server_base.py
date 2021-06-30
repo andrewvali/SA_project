@@ -4,7 +4,12 @@ import json
 from SPARQLWrapper import SPARQLWrapper, JSON
 from construct_handler import ConstructQuery
 
-IP_PORT = "localhost:8890"
+with open('Address Settings.txt') as f:
+    IP_PORT = f.readlines()[0]
+f.close()
+if IP_PORT is None:
+    print("Insert an address in Address Settings.txt")
+    exit(1)
 
 class HTTPRequestHandler(BaseHTTPRequestHandler):
 

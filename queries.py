@@ -12,7 +12,13 @@ import os
 import csv
 
 # IP SERVER
-IP_PORT = "87.17.92.222:8890"
+with open('Address Settings.txt') as f:
+    IP_PORT = f.readlines()[0]
+f.close()
+if IP_PORT is None:
+    print("Insert an address in Address Settings.txt")
+    exit(1)
+
 
 PATH_VESSEL_CODE = "dataset_vessel_type\\nari_static.csv"
 PATH_VESSEL_TYPE = "dataset_vessel_type\\vessel_type.CSV"
