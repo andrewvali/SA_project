@@ -8,12 +8,19 @@ import tkinter.font as font
 from explained_queries import *
 from tkinter.messagebox import showinfo
 
+'''
+This file contains the implementation of user interface. 
+This is the file to be launched to start the application 
+'''
 class gui():
     def __init__(self):
         self.initialize()
 
     def initialize(self):
-
+        '''
+        This function implements
+        :return:
+        '''
         self.root = Tk()
         self.root.geometry("600x500")
 
@@ -71,7 +78,7 @@ class gui():
         prefixes += "\n\nSELECT COUNT(*) WHERE {?s ?p ?o}"
 
         self.text.insert("end", prefixes)
-        close = Button(self.gui, text="Back", command=self.gui.destroy, bg="black", fg="white")
+        close = Button(self.gui, text="Back", command=self.gui.destroy, bg="darkgray", fg="black")
         close.pack(fill='x', pady=5, side=BOTTOM, ipadx=28)
 
         run = Button(self.gui, text="Run", command=self.custom_query, bg="green", fg="white")
@@ -125,7 +132,7 @@ class gui():
 
         self.datetimeStartEntry.pack(fill='x', padx=5, pady=5)
 
-        self.label_datetimeEnd = ttk.Label(text="End date and time (eg: 2015-09-30 22:00)", font=font.BOLD)
+        self.label_datetimeEnd = ttk.Label(text="End date and time (eg: 2015-10-25 22:00)", font=font.BOLD)
         self.label_datetimeEnd.pack(fill='x', padx=5, pady=5)
 
         datetime_end = StringVar()
@@ -207,6 +214,23 @@ class gui():
         self.vesselEntry = Entry(textvariable=vessel)
 
         self.vesselEntry.pack(fill='x', padx=5, pady=5)
+        self.label_datetimeStart = ttk.Label(text="Start date and time (eg: 2015-09-30 22:00)", font=font.BOLD)
+        self.label_datetimeStart.pack(fill='x', padx=5, pady=5)
+
+        datetime_start = StringVar()
+
+        self.datetimeStartEntry = Entry(textvariable=datetime_start)
+
+        self.datetimeStartEntry.pack(fill='x', padx=5, pady=5)
+
+        self.label_datetimeEnd = ttk.Label(text="End date and time (eg: 2015-10-15 22:00)", font=font.BOLD)
+        self.label_datetimeEnd.pack(fill='x', padx=5, pady=5)
+
+        datetime_end = StringVar()
+
+        self.datetimeEndEntry = Entry(textvariable=datetime_end)
+
+        self.datetimeEndEntry.pack(fill='x', padx=5, pady=5)
 
         self.query = Button(text="Run Query", command=self.run_query, bg="lime green", fg="black", font=font.BOLD)
         self.query.pack(fill='x', padx=5, pady=5)
@@ -223,7 +247,7 @@ class gui():
         #self.event_cb.destroy()
         self.query.destroy()
         self.root.title("Analysis of Event per vessel")
-        events = ('StoppedInit', 'StoppedEnd', 'HeadingChange', 'SpeedChangeStart', 'SpeedChangeEnd',
+        events = ('All','StoppedInit', 'StoppedEnd', 'HeadingChange', 'SpeedChangeStart', 'SpeedChangeEnd',
                   'SlowMotionStart', 'SlowMotionEnd', 'GapEnd')
 
         self.label_vessel = ttk.Label(text="Write vessel code (write 'All' for every vessel): ", font=font.BOLD)
@@ -234,7 +258,7 @@ class gui():
 
         self.vesselEntry.pack(fill='x', padx=5, pady=5)
 
-        self.label_event_for_ship = ttk.Label(text="Please select an event of interest:", font=font.BOLD)
+        self.label_event_for_ship = ttk.Label(text="Please select an event of interest (All for every event):", font=font.BOLD)
         self.label_event_for_ship.pack(fill='x', padx=5, pady=5)
 
         selected_event = StringVar()
@@ -243,6 +267,25 @@ class gui():
         self.event_cb['state'] = 'readonly'
         self.event_cb.pack(fill='x', padx=5, pady=5)
         self.event_cb.bind('<<ComboboxSelected>>')
+
+        self.label_datetimeStart = ttk.Label(text="Start date and time (eg: 2015-09-30 22:00)", font=font.BOLD)
+        self.label_datetimeStart.pack(fill='x', padx=5, pady=5)
+
+        datetime_start = StringVar()
+
+        self.datetimeStartEntry = Entry(textvariable=datetime_start)
+
+        self.datetimeStartEntry.pack(fill='x', padx=5, pady=5)
+
+        self.label_datetimeEnd = ttk.Label(text="End date and time (eg: 2015-10-15 22:00)", font=font.BOLD)
+        self.label_datetimeEnd.pack(fill='x', padx=5, pady=5)
+
+        datetime_end = StringVar()
+
+        self.datetimeEndEntry = Entry(textvariable=datetime_end)
+
+        self.datetimeEndEntry.pack(fill='x', padx=5, pady=5)
+
 
         self.query = Button(text="Run Query", command=self.run_query, bg="lime green", fg="black", font=font.BOLD)
         self.query.pack(fill='x', padx=5, pady=5)
@@ -296,9 +339,9 @@ class gui():
     def run_query(self):
         print(self.choice)
         if self.choice == 'Event per vessel':
-            EventForShip(self.event_cb.get(),self.vesselEntry.get())
+            EventForShip(self.event_cb.get(),self.vesselEntry.get(),self.datetimeStartEntry.get(), self.datetimeEndEntry.get())
         elif self.choice=='Vessels in interdicted fishing area':
-            InterdictionArea(self.vesselEntry.get())
+            InterdictionArea(self.vesselEntry.get(),self.datetimeStartEntry.get(), self.datetimeEndEntry.get())
         elif self.choice=='Vessels in protected area':
             ProtectedArea(self.protected_area_cb.get(),self.vesselEntry.get(),self.event_choices_cb.get())
         elif self.choice=='Vessel trajectory with highlighted Gap event':
