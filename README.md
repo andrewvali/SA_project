@@ -14,3 +14,7 @@ This is the official repository of Situation Awareness exam.
 * numpy == 1.18.4
 * opencv-python == 4.2.0.34
 * matplotlib == 3.2.1
+
+# How to run the application
+To run the application, clone the repository and use a tool to run the file (eg: Pycharm, Visual Studio).
+After you have installed all requirements, you have to run [gui_base.py](https://github.com/andrewvali/SA_project/blob/main/gui_base.py) file.
