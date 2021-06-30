@@ -20,45 +20,63 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
         print(str(json_data))
         try:
             res = {}
-            #GESTIONE A GRANDI LINEE CON VARI IF
             if json_data["type"] == "event per ship":
                 event = json_data["query"]["event"]
                 vessel = json_data["query"]["vessel"]
+                datetime_start = json_data["query"]["date1"]
+                datetime_end = json_data["query"]["date2"]
 
-                if event == "" or vessel == "":
+                if event == "" or vessel == "" or datetime_start == "" or datetime_end == "":
                     raise KeyError
+
+                datetime_start = self.datetime_from_html_to_sparql(datetime_start)
+                datetime_end = self.datetime_from_html_to_sparql(datetime_end)
+
                 if vessel.lower() == "all":
                     ves = "?vessel"
                 else:
                     ves = ":" + vessel
 
-                query = EVENT_FOR_SHIP_QUERY.replace("[EVENT]", ":" + event).replace("[VESSEL]", ves)
+                query = EVENT_FOR_SHIP_QUERY.replace("[EVENT]", ":" + event).replace("[VESSEL]", ves).\
+                    replace("[DATE_START]", datetime_start).replace("[DATE_END]", datetime_end)
+
                 res = self.do_query(query)
 
             elif json_data["type"] == "interdiction area":
                 vessel = json_data["query"]["vessel"]
+                datetime_start = json_data["query"]["date1"]
+                datetime_end = json_data["query"]["date2"]
 
-                if vessel == "":
+                if vessel == "" or datetime_start == "" or datetime_end == "":
                     raise KeyError
+
+                datetime_start = self.datetime_from_html_to_sparql(datetime_start)
+                datetime_end = self.datetime_from_html_to_sparql(datetime_end)
 
                 if vessel.lower() == "all":
                     ves = "?vessel"
                 else:
                     ves = ":" + vessel
 
-                query = QUERY_INTERDICTION_AREA.replace("[VESSEL]", ves)
+                query = QUERY_INTERDICTION_AREA.replace("[VESSEL]", ves).\
+                    replace("[DATE_START]", datetime_start).replace("[DATE_END]", datetime_end)
+
                 res = self.do_query(query)
 
             elif json_data["type"] == "protected area":
                 protectedArea = json_data["query"]["protectedArea"]
                 event = json_data["query"]["event"]
                 vessel = json_data["query"]["vessel"]
+                datetime_start = json_data["query"]["date1"]
+                datetime_end = json_data["query"]["date2"]
 
-
-                if protectedArea == "" or vessel=="" or event == "" :
+                if protectedArea == "" or vessel=="" or event == "" or datetime_start == "" or datetime_end == "":
                     raise KeyError
 
                 area_code = ":" + protectedArea
+
+                datetime_start = self.datetime_from_html_to_sparql(datetime_start)
+                datetime_end = self.datetime_from_html_to_sparql(datetime_end)
 
                 if vessel.lower() == "all":
                     ves = "?vessel"
@@ -77,14 +95,14 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
 
                 con.construct_initializer(query_construct)
 
-                area_query = PROTECTED_AREA_QUERY.replace("[VESSEL]", ves).replace("[EVENT]", eve)
+                area_query = PROTECTED_AREA_QUERY.replace("[VESSEL]", ves).replace("[EVENT]", eve).\
+                    replace("[DATE_START]", datetime_start).replace("[DATE_END]", datetime_end)
 
                 result = con.construct_query(area_query)
 
                 res = self.dict_from_query_result(result)
             else:
                 res = None
-            #FINE GESTIONE A GRANDI LINEE CON VARI IF
 
 
             if res is None:
@@ -127,6 +145,11 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
                 msg[i] = str(triple[i]["value"]).split("/")[-1].split("#")[-1]
             res.append(msg)
         return res
+
+    def datetime_from_html_to_sparql(self,datetime):
+        datetime = str(datetime).replace(" ", "T")
+        datetime = '"' + datetime + ":00" + '"' + "^^xsd:dateTime"
+        return datetime
 
 
 
