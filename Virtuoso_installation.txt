@@ -1,0 +1,39 @@
+################## COME INSTALLARE VIRTUOSO IN LOCALE ##################
+-1.Scaricare la versione enterprise sul sito ufficiale (anche solo la versione di prova)
+	NB: la versione opensource NON è utilizzabile in quanto pare ci sia un bug all'inserimento di dati nel database sql
+	
+-2.Generare una licensa sul sito
+
+-3.Installare Virtuoso
+
+-4.Andare in (su Windows e in maniera simile su Mac) programmi/OpenLink Software/Virtuoso 8.3/database
+
+-5.Modificare il file virtuoso.ini:
+	-inserire il percorso locale dove sono presenti i dataset da caricare in DirsAllowed
+	-in base alla RAM disponibile settare MaxQueryMem, NumberOfBuffers e MaxDirtyBuffers
+
+-6.Avviare Virtuoso
+
+-7.Andare su localhost:8890
+
+-8.Dal menu selezionare Conductor e usare le credenziali standard user:"dba", pw="dba" per loggare
+
+-9.Andare in Web Application server, risalire la dir e creare una cartella nuova
+
+-10.Inserire qui l'ontologia di partenza (supponendo sia leggera sennò inserirla tramite il passaggio seguente)
+
+-11.Andare in Database<Intercative SQL
+
+-12.Inserire in Bulk load ogni dataset uno alla volta tramite il seguente script da avviare tutto in una volta per ogni inserimento:
+		DELETE FROM DB.DBA.load_list;
+		LD_DIR('--DIR DI PROGETTO--', '--NOME DATASET--.ttl', 'http://localhost:8890/DAV/--NOME CARTELLA--');
+		SELECT * FROM DB.DBA.load_list;
+		RDF_LOADER_RUN();
+		SELECT * FROM DB.DBA.load_list;
+
+-13.Una volta finito andare in System Admin<User Account e generare un utente nuovo di tipo SQL/ODBC and WebDAV e dar lui come ruolo almeno:
+	-SPARQL_SELECT
+	-SPARQL_UPDATE (nel dubbio metterli tutti)
+
+-14.Usare localhost:8890/sparql/ come endpoint per query SPARQL
+	e usare (loggando con l'utente creato prima) localhost:8890/sparql-auth/ per eseguire comandi SPARQL/UPDATE
