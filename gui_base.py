@@ -18,8 +18,7 @@ class gui():
 
     def initialize(self):
         '''
-        This function implements
-        :return:
+        This function implements home page graphic of the application
         '''
         self.root = Tk()
         self.root.geometry("600x500")
@@ -61,7 +60,11 @@ class gui():
         self.root.mainloop()
 
     def expert_mode(self):
-
+        """
+        This function implements the window to write a custom query.
+        This function is called when user click on "Custom Query" button.
+        :return:
+        """
 
         self.gui = Tk()
         self.gui.geometry('700x500')
@@ -90,10 +93,18 @@ class gui():
         self.gui.mainloop()
 
     def custom_query(self):
+        """
+        This function is called when user is in expert mode and click on "Run Query" button.
+        It invokes the CustomQuery to launch the query written.
+        """
         CustomQuery(self.text.get("1.0", "end-1c"))
 
 
     def analysis(self):
+        """
+        This funcion is called when the user makes a choice and click on "SUBMIT" button.
+        Based on the choice made, a specific function will be called
+        """
         self.choice = str(self.choice_cb.get())
         self.label2.destroy()
         self.canvas.destroy()
@@ -101,7 +112,7 @@ class gui():
         self.expert.destroy()
         if self.choice == "Event per vessel":
             self.analysis_event_per_vessel()
-        elif self.choice=='Vessels in interdicted fishing area':
+        elif self.choice=='Vessels stopped in interdicted fishing area':
             self.analysis_interdiction_area()
         elif self.choice == 'Vessels in protected area':
             self.analysis_protected_area()
@@ -109,6 +120,11 @@ class gui():
             self.analysis_traj_gap()
 
     def analysis_traj_gap(self):
+        """
+        This function is called when the user chooses the trajectory option in the home page.
+        It implements the graphic of "Analysis of vessels trajectory" window and gives the user the possibility to
+        enter the data of interest..
+        """
         self.label.destroy()
         self.choice_cb.destroy()
         # self.event_cb.destroy()
@@ -151,6 +167,11 @@ class gui():
 
 
     def analysis_protected_area(self):
+        """
+        This function is called when the user chooses the "analysis of protected area" option in the home page.
+        It implements the graphic of "Vessels stopped in a protected area" window and gives the user the possibility to
+        enter the data of interest..
+        """
         self.label.destroy()
         self.choice_cb.destroy()
         # self.event_cb.destroy()
@@ -219,6 +240,11 @@ class gui():
         self.button_back.pack(fill='x', padx=5, pady=5)
 
     def analysis_interdiction_area(self):
+        """
+        This function is called when the user chooses the "analysis of interdicted area" option in the home page.
+        It implements the graphic of "Analysis of interdicted area" window and gives the user the possibility to
+        enter the data of interest.
+        """
         self.label.destroy()
         self.choice_cb.destroy()
         # self.event_cb.destroy()
@@ -257,7 +283,11 @@ class gui():
         self.button_back.pack(fill='x', padx=5, pady=5)
 
     def analysis_event_per_vessel(self):
-
+        """
+        This function is called when the user chooses the "analysis of event per vessel" option in the home page.
+        It implements the graphic of "event per vessel" window and gives the user the possibility to
+        enter the data of interest.
+        """
         self.choice = str(self.choice_cb.get())
         self.label.destroy()
         self.choice_cb.destroy()
@@ -312,12 +342,16 @@ class gui():
         self.button_back.pack(fill='x', padx=5, pady=5)
 
     def show_query(self):
+        """
+        This function is called when user click on "Show Query" button. Based on the user choice made in home page,
+        it will be showed a particular query in another window.
+        """
         query_window = Tk()
         query_window.title("Query")
         text = Text(query_window)
         if self.choice == 'Event per vessel':
             text.insert("end", EVENT_FOR_SHIP_QUERY)
-        elif self.choice=='Vessels in interdicted fishing area':
+        elif self.choice=='Vessels stopped in interdicted fishing area':
             scrollbar = Scrollbar(query_window, orient=VERTICAL)
             scrollbar.pack(side="right", fill='y')
             text = Text(query_window, yscrollcommand=scrollbar.set)
@@ -345,6 +379,9 @@ class gui():
 
 
     def text_search(self, text_widget, keyword, tag):
+        """
+        This function is called to color some text inside the window
+        """
         pos = '1.0'
         while True:
             idx = text_widget.search(keyword, pos, END)
@@ -354,10 +391,14 @@ class gui():
             text_widget.tag_add(tag, idx, str(idx)+" lineend")
 
     def run_query(self):
+        """
+        This function is called when the user click on "Run Query" button. Based on the choice,
+        it will be launched a particular query.
+        """
         print(self.choice)
         if self.choice == 'Event per vessel':
             EventForShip(self.event_cb.get(),self.vesselEntry.get(),self.datetimeStartEntry.get(), self.datetimeEndEntry.get())
-        elif self.choice=='Vessels in interdicted fishing area':
+        elif self.choice=='Vessels stopped in interdicted fishing area':
             InterdictionArea(self.vesselEntry.get(),self.datetimeStartEntry.get(), self.datetimeEndEntry.get())
         elif self.choice=='Vessels in protected area':
             ProtectedArea(self.protected_area_cb.get(),self.vesselEntry.get(),self.event_choices_cb.get(),self.datetimeStartEntry.get(), self.datetimeEndEntry.get())
@@ -366,6 +407,9 @@ class gui():
 
 
     def back(self):
+        """
+        This function is called when the user click on "Back" button.
+        """
         self.root.destroy()
         self.initialize()
 

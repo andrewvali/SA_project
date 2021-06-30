@@ -10,20 +10,32 @@ from math import *
 from explained_queries import *
 import os
 import csv
+
 # IP SERVER
 IP_PORT = "87.17.92.222:8890"
 
 PATH_VESSEL_CODE = "dataset_vessel_type\\nari_static.csv"
 PATH_VESSEL_TYPE = "dataset_vessel_type\\vessel_type.CSV"
 
+"""
+This dict will be formed by:
+
+KEY = Vessel MMSI
+Value = Type code 
+"""
 my_dict = {}
 
 with open(os.path.abspath(PATH_VESSEL_CODE) ,mode="r") as csv_file:
     csv_reader = csv.reader((csv_file), delimiter=",")
-
     for row in csv_reader:
-        #l.append(row[1].upper())
         my_dict["ves"+row[0]] = row[4]
+
+"""
+This dict will be formed by:
+
+KEY = Type code 
+Value = Type description 
+"""
 
 my_dict2 = {}
 
@@ -34,12 +46,21 @@ with open(os.path.abspath(PATH_VESSEL_TYPE) ,mode="r") as csv_file2:
         my_dict2[row2[0]] = row2[1]
 
 class CustomQuery():
+    """
+    This class is invoked when user wants to launch a custom query
+    """
     def __init__(self,query):
+        """
+        :param query: query written by user
+        """
         self.query= query
         self.run_query()
 
     def run_query(self):
-
+        """
+        This function is called to launch the query, to acquire the query result and
+        to call gui_result function to show the result
+        """
         sparql = SPARQLWrapper("http://" + IP_PORT + "/sparql/")
         sparql.setQuery(self.query)
         sparql.setReturnFormat(JSON)
@@ -57,6 +78,9 @@ class CustomQuery():
 
 
     def gui_result(self):
+        """
+        This function is called to show the query result. It implements a new window to show result.
+        """
         self.gui = Tk()
         # self.gui.geometry('700x500')
         self.gui.title("Results of query ")
@@ -72,7 +96,16 @@ class CustomQuery():
 
 
 class EventForShip():
+    """
+    This class is invoked to run event per vessel query
+    """
     def __init__(self,event,vessel, datetime_start, datetime_end):
+        """
+        :param event: event to analize chosen by user
+        :param vessel: vessel to analize chosen by user
+        :param datetime_start: start date chosen by user
+        :param datetime_end: end date chosen by user
+        """
         self.event = str(event)
         self.vessel = str(vessel)
         self.datetime_start=datetime_convert(datetime_start)
@@ -80,6 +113,10 @@ class EventForShip():
         self.run_query()
 
     def run_query(self):
+        """
+        This function is called to run the query. It replaces the parameters chosen by user in the basic query.
+        The query result is obtained by server and it calls the gui_result function to show the result.
+        """
         if self.event != "" and self.vessel != "":
             if self.vessel == "All":
                 ves = "?vessel"
@@ -118,6 +155,9 @@ class EventForShip():
             showinfo('Warning!', 'Complete all fields! ')
 
     def gui_result(self):
+        """
+        This function is called to show the query result. It implements a new window to show the result
+        """
         self.gui = Tk()
         #self.gui.geometry('700x500')
         self.gui.title("Result of event per vessel: " +self.vessel)
@@ -164,6 +204,10 @@ class EventForShip():
         self.gui.mainloop()
 
     def show_query(self):
+        """
+        This function is called when user click on "Show Query" button from result window.
+        It shows the query launched.
+        """
         def event_button():
             query_window.destroy()
             self.gui_result()
@@ -183,14 +227,26 @@ class EventForShip():
 
 
 class InterdictionArea():
+    """
+    This class is invoked to run vessels stopped in a fishing interdicted area query
+    """
 
     def __init__(self,vessel, datetime_start, datetime_end):
+        """
+        :param vessel: vessel to analize chosen by user
+        :param datetime_start: start date chosen by user
+        :param datetime_end: end date chosen by user
+        """
         self.vessel = str(vessel)
         self.datetime_start = datetime_convert(datetime_start)
         self.datetime_end = datetime_convert(datetime_end)
         self.run_query()
 
     def run_query(self):
+        """
+        This function is called to run the query. It replaces the parameters chosen by user in the basic query.
+        The query result is obtained by server and it calls the gui_result function to show the result.
+        """
         if self.vessel != "":
             if self.vessel == "All":
                 ves = "?vessel"
@@ -228,6 +284,9 @@ class InterdictionArea():
             showinfo('Warning!', 'Complete all fields! ')
 
     def gui_result(self):
+        """
+        This function is called to show the query result. It implements a new window to show the result.
+        """
         self.gui = Tk()
         #self.gui.geometry('700x500')
         self.gui.title("Result of events in an interdicted fishing area. VESSEL: " +self.vessel)
@@ -275,6 +334,10 @@ class InterdictionArea():
         self.gui.mainloop()
 
     def show_query(self):
+        """
+        This function is called when user click on "Show Query" button from result window.
+        It shows the query launched.
+        """
         def event_button():
             query_window.destroy()
             self.gui_result()
@@ -293,7 +356,17 @@ class InterdictionArea():
         text.pack(side="left", fill="y")
 
 class ProtectedArea():
+    """
+    This class is invoked to run analysis in a protected area query
+    """
     def __init__(self,protected_area_code,vessel,event,datetime_start, datetime_end):
+        """
+        :param protected_area_code: area code of Natura2000 chosen by user
+        :param event: event to analize chosen by user
+        :param vessel: vessel to analize chosen by user
+        :param datetime_start: start date chosen by user
+        :param datetime_end: end date chosen by user
+        """
         self.protectedArea = str(protected_area_code)
         self.datetime_start = datetime_convert(datetime_start)
         self.datetime_end = datetime_convert(datetime_end)
@@ -302,6 +375,11 @@ class ProtectedArea():
         self.run_query()
 
     def run_query(self):
+        """
+        This function is called to run the query. It replaces the parameters chosen by user in the basic query.
+        The query result is obtained by server and it calls the gui_result function to show the result.
+        It is launched construct query and then another query on triples generated by construct
+        """
         if self.protectedArea[:16] != "" and self.vessel!="" and self.event!="":
             if self.protectedArea[:16] == "All":
                 area_code = "?area"
@@ -319,7 +397,7 @@ class ProtectedArea():
 
             self.query_construct= PROTECTED_AREA_CONSTRUCT.replace("[AREA]",area_code)
 
-            con = ConstructQuery('http://'+IP_PORT+'/DAV/provolone', 'http://'+IP_PORT+'/sparql/',
+            con = ConstructQuery('http://'+IP_PORT+'/DAV/contructeDataset', 'http://'+IP_PORT+'/sparql/',
                                  'http://'+IP_PORT+'/sparql-auth/', 'operator',
                                  'operator')  # user #pw
 
@@ -354,6 +432,9 @@ class ProtectedArea():
             showinfo('Warning!', 'Complete all fields! ')
 
     def gui_result(self):
+        """
+        This function is called to show the query result. It implements a new window to show the result.
+        """
         self.gui = Tk()
         #self.gui.geometry('700x500')
         self.gui.title("AREA: " +self.protectedArea[19:]
@@ -399,6 +480,10 @@ class ProtectedArea():
         self.gui.mainloop()
 
     def show_query(self):
+        """
+        This function is called when user click on "Show Query" button from result window.
+        It shows the query launched.
+        """
         def event_button():
             query_window.destroy()
             self.gui_result()
@@ -426,8 +511,15 @@ XMAX = -0.4
 YMAX = 49.9
 
 class TrajectoryAndGap():
-
+    """
+    This class is invoked to run analysis of thrajectory and gap event query
+    """
     def __init__(self, vessel,datetime_start,datetime_end):
+        """
+        :param vessel: vessel to analize chosen by user
+        :param datetime_start: start date chosen by user
+        :param datetime_end: end date chosen by user
+        """
         self.vessel = str(vessel)
         self.map = pltMap(XMIN, YMIN, XMAX, YMAX)
         self.datetime_start = datetime_convert(datetime_start)
@@ -435,6 +527,10 @@ class TrajectoryAndGap():
         self.run_query()
 
     def run_query(self):
+        """
+        This function is called to run the query. It replaces the parameters chosen by user in the basic query.
+        The query result is obtained by server and it calls the gui_result function to show the result.
+        """
         if self.vessel != "":
             if self.vessel == "All":
                 ves = "?vessel"
@@ -449,8 +545,10 @@ class TrajectoryAndGap():
             triples = result["results"]["bindings"]
             t = result["head"]["vars"]
             result = ""
+
+            # points list contains the position of all ports
             points = []
-            mydict = {}
+
             for triple in triples:
                 msg = ""
                 for i in t:
@@ -476,7 +574,11 @@ class TrajectoryAndGap():
             triples = result["results"]["bindings"]
             t = result["head"]["vars"]
             self.result = ""
+
+            # points_vessel contains all points of vessel trajectory
             self.points_vessel = []
+
+            #timestamp_vessel_point contains the timestamp of each point
             timestamp_vessel_point = []
 
             for triple in triples:
@@ -496,9 +598,10 @@ class TrajectoryAndGap():
                 self.points_vessel.append(
                     [float(coord) for coord in msg.split(";")[-1].split("(")[-1].split(")")[0].split(" ")])
 
-            # points_vessel =np.array(points_vessel)
 
             R = 6373.0
+
+            # This list contains all distance between vessel and nearest port
             dist = []
             self.gap_points = []
             k = 0
@@ -514,10 +617,14 @@ class TrajectoryAndGap():
                     c = 2 * atan2(sqrt(a), sqrt(1 - a))
                     dist.append(R * c)
 
+                # if the min distance is less than 5 km and more than half an hour has passed
+                # between two successive communications, the gap event is not detected
                 if min(dist) < 2 and abs(timestamp_vessel_point[i] - timestamp_vessel_point[i + 1]) >= 500000:
                     print(self.points_vessel[i], points[dist.index(min(dist))])
                     print("NO Event Gap")
 
+                # if the min distance is greater than 5 km and more than half an hour has passed
+                # between two successive communications, the gap event is detected
                 elif min(dist) > 2 and abs(timestamp_vessel_point[i] - timestamp_vessel_point[i + 1]) >= 500000:
                     print("YES Event Gap")
                     self.gap_points.append(self.points_vessel[i])
@@ -529,6 +636,9 @@ class TrajectoryAndGap():
             showinfo('Warning!', 'Complete all fields! ')
 
     def gui_result(self):
+        """
+        This function is called to show the query result. It implements a new window to show the result.
+        """
         def event_button():
             self.gui.destroy()
             self.show_map()
@@ -563,6 +673,10 @@ class TrajectoryAndGap():
         self.gui.mainloop()
 
     def show_query(self):
+        """
+        This function is called when user click on "Show Query" button from result window.
+        It shows the query launched.
+        """
         def event_button():
             self.gui.destroy()
             self.show_map()
@@ -585,6 +699,9 @@ class TrajectoryAndGap():
         self.gui.mainloop()
 
     def show_map(self):
+        """
+        This function is called to show the map with trajectory and Gap event
+        """
         def event_button():
             self.map = pltMap(XMIN, YMIN, XMAX, YMAX)
             window.destroy()
@@ -634,6 +751,10 @@ def text_search(text_widget, keyword, tag, flag=False):
         text_widget.tag_add(tag, idx, s)
 
 def datetime_convert(datetime):
+    """
+    :param datetime: datetime chosen by user
+    :return: corrected format of datetime to launch the query
+    """
     datetime = str(datetime).replace(" ", "T")
     datetime = '"' + datetime + ":00" + '"' + "^^xsd:dateTime"
     print(datetime)
