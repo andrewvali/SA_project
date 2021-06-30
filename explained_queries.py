@@ -13,8 +13,10 @@ EVENT_FOR_SHIP_QUERY = """
 SELECT DISTINCT ?vessel ?event (COUNT(?event) as ?num_event)
 WHERE{
 ?event :occurs ?node.
-?node :ofMovingObject ?vessel
-FILTER(?event = [EVENT] && ?vessel = [VESSEL])
+?node :ofMovingObject ?vessel.
+?node :hasTemporalFeature ?timestamp.
+?timestamp :TimeStart ?datetime.
+FILTER(?event = [EVENT] && ?vessel = [VESSEL] && ?datetime >= [DATE_START] && ?datetime <= [DATE_END])
 }GROUP BY ?vessel ?event HAVING(COUNT(?event)>2)
 ORDER BY DESC(?num_event)"""
 
@@ -79,7 +81,7 @@ QUERY_INTERDICTION_AREA = """# EXPLAINATION: RETURNS VESSEL STOPPED IN AN INTERD
 @prefix : <http://www.datacron-project.eu/ais_dataset#> .
 @prefix unit: <http://www.datacron-project.eu/unit#> .
 
-SELECT DISTINCT ?vessel ?tstart ?point
+SELECT DISTINCT ?vessel ?datetime ?point
 WHERE{
 
 ?area a :Fishing_Interdiction_area.
@@ -87,7 +89,7 @@ WHERE{
 :StoppedInit :occurs ?obj.
 ?obj :ofMovingObject ?vessel.
 ?obj :hasTemporalFeature ?timestamp_start.
-?timestamp_start :TimeStart ?tstart.
+?timestamp_start :TimeStart ?datetime.
 
 ?area :hasGeometry ?geom2 .
 ?geom2 ogc:asWKT ?zone .
@@ -96,7 +98,7 @@ WHERE{
 ?geom ogc:asWKT ?point .
 
 
-FILTER (geof:sfWithin(?point, ?zone) && ?vessel = [VESSEL])
+FILTER (geof:sfWithin(?point, ?zone) && ?vessel = [VESSEL] && ?datetime >= [DATE_START] && ?datetime <= [DATE_END])
 } LIMIT 10"""
 
 

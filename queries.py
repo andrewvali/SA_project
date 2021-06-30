@@ -72,9 +72,17 @@ class CustomQuery():
 
 
 class EventForShip():
-    def __init__(self,event,vessel):
+    def __init__(self,event,vessel, datetime_start, datetime_end):
         self.event = str(event)
         self.vessel = str(vessel)
+        datetime_start = str(datetime_start).replace(" ", "T")
+        datetime_start = '"' + datetime_start + ":00" + '"' + "^^xsd:dateTime"
+        datetime_end = str(datetime_end).replace(" ", "T")
+        datetime_end = '"' + datetime_end + ":00" + '"' + "^^xsd:dateTime"
+        self.datetime_start = datetime_start
+        self.datetime_end = datetime_end
+        print(self.datetime_start)
+        print(self.datetime_end)
         self.run_query()
 
     def run_query(self):
@@ -83,9 +91,15 @@ class EventForShip():
                 ves = "?vessel"
             else:
                 ves = ":" + self.vessel
+            if self.event=="All":
+                self.event="?event"
+            else:
+                self.event=":"+self.event
+            print(self.event)
             sparql = SPARQLWrapper("http://"+IP_PORT+"/sparql/")
 
-            self.query = EVENT_FOR_SHIP_QUERY.replace("[EVENT]",":"+self.event).replace("[VESSEL]",ves)
+            self.query = EVENT_FOR_SHIP_QUERY.replace("[EVENT]",self.event).replace("[VESSEL]",ves)
+            self.query = self.query.replace("[DATE_START]",self.datetime_start).replace("[DATE_END]",self.datetime_end)
 
             sparql.setQuery(self.query)
 
@@ -117,7 +131,13 @@ class EventForShip():
         scrollbar.pack(side="right", fill='y')
         text = Text(self.gui, yscrollcommand=scrollbar.set)
         if self.res!="":
-            text.insert("end", self.res)
+            text.insert("end", "TIME INTERVAL: " + self.datetime_start[1:17].replace("T", " ") +
+                        " / " + self.datetime_end[1:17].replace("T", " ") + "\n" + "\n" + self.res)
+
+            text.tag_config("time_interval", foreground="blue")
+            # text.tag_config("prefix", foreground="orange")
+            text_search(text, "TIME INTERVAL:", "time_interval", True)
+
             text.tag_config("vessel", foreground="blue")
             # text.tag_config("prefix", foreground="orange")
             text_search(text, "VESSEL:", "vessel",True)
@@ -170,8 +190,16 @@ class EventForShip():
 
 class InterdictionArea():
 
-    def __init__(self,vessel):
+    def __init__(self,vessel, datetime_start, datetime_end):
         self.vessel = str(vessel)
+        datetime_start = str(datetime_start).replace(" ", "T")
+        datetime_start = '"' + datetime_start + ":00" + '"' + "^^xsd:dateTime"
+        datetime_end = str(datetime_end).replace(" ", "T")
+        datetime_end = '"' + datetime_end + ":00" + '"' + "^^xsd:dateTime"
+        self.datetime_start = datetime_start
+        self.datetime_end = datetime_end
+        print(self.datetime_start)
+        print(self.datetime_end)
         #self.map = pltMap(XMIN, YMIN, XMAX, YMAX)
         self.run_query()
 
@@ -185,7 +213,7 @@ class InterdictionArea():
             #sparql.setTimeout(30)
 
             self.query = QUERY_INTERDICTION_AREA.replace("[VESSEL]", ves)
-
+            self.query = self.query.replace("[DATE_START]",self.datetime_start).replace("[DATE_END]",self.datetime_end)
             sparql.setQuery(self.query)
 
             sparql.setReturnFormat(JSON)
@@ -220,7 +248,13 @@ class InterdictionArea():
         scrollbar.pack(side="right", fill='y')
         text = Text(self.gui, yscrollcommand=scrollbar.set)
         if self.res!="":
-            text.insert("end", self.res)
+
+            text.insert("end", "TIME INTERVAL: "+self.datetime_start[1:17].replace("T"," ")+
+                        " / "+self.datetime_end[1:17].replace("T"," ")+"\n"+"\n"+self.res)
+
+            text.tag_config("time_interval", foreground="blue")
+            # text.tag_config("prefix", foreground="orange")
+            text_search(text, "TIME INTERVAL:", "time_interval", True)
             text.tag_config("vessel", foreground="blue")
             # text.tag_config("prefix", foreground="orange")
             text_search(text, "VESSEL:", "vessel", True)
