@@ -193,6 +193,23 @@ class gui():
         self.event_choices_cb['state'] = 'readonly'
         self.event_choices_cb.pack(fill='x', padx=5, pady=5)
         self.event_choices_cb.bind('<<ComboboxSelected>>')
+        self.label_datetimeStart = ttk.Label(text="Start date and time (eg: 2015-09-30 22:00)", font=font.BOLD)
+        self.label_datetimeStart.pack(fill='x', padx=5, pady=5)
+
+        datetime_start = StringVar()
+
+        self.datetimeStartEntry = Entry(textvariable=datetime_start)
+
+        self.datetimeStartEntry.pack(fill='x', padx=5, pady=5)
+
+        self.label_datetimeEnd = ttk.Label(text="End date and time (eg: 2015-10-15 22:00)", font=font.BOLD)
+        self.label_datetimeEnd.pack(fill='x', padx=5, pady=5)
+
+        datetime_end = StringVar()
+
+        self.datetimeEndEntry = Entry(textvariable=datetime_end)
+
+        self.datetimeEndEntry.pack(fill='x', padx=5, pady=5)
 
         self.query = Button(text="Run Query", command=self.run_query, bg="lime green", fg="black", font=font.BOLD)
         self.query.pack(fill='x', padx=5, pady=5)
@@ -343,7 +360,7 @@ class gui():
         elif self.choice=='Vessels in interdicted fishing area':
             InterdictionArea(self.vesselEntry.get(),self.datetimeStartEntry.get(), self.datetimeEndEntry.get())
         elif self.choice=='Vessels in protected area':
-            ProtectedArea(self.protected_area_cb.get(),self.vesselEntry.get(),self.event_choices_cb.get())
+            ProtectedArea(self.protected_area_cb.get(),self.vesselEntry.get(),self.event_choices_cb.get(),self.datetimeStartEntry.get(), self.datetimeEndEntry.get())
         elif self.choice=='Vessel trajectory with highlighted Gap event':
             TrajectoryAndGap(self.vesselEntry.get(), self.datetimeStartEntry.get(), self.datetimeEndEntry.get())
 
