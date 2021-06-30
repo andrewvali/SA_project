@@ -26,7 +26,7 @@ class gui():
 
         self.root.title("Knowledge Base")
 
-        choices = ('Event per vessel', 'Vessels in interdicted fishing area', 'Vessels in protected area',
+        choices = ('Event per vessel', 'Vessels stopped in interdicted fishing area', 'Vessels in protected area',
                    'Vessel trajectory with highlighted Gap event')
 
         self.label = ttk.Label(text="Please select a query",font=font.BOLD)

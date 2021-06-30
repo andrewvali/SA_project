@@ -75,14 +75,8 @@ class EventForShip():
     def __init__(self,event,vessel, datetime_start, datetime_end):
         self.event = str(event)
         self.vessel = str(vessel)
-        datetime_start = str(datetime_start).replace(" ", "T")
-        datetime_start = '"' + datetime_start + ":00" + '"' + "^^xsd:dateTime"
-        datetime_end = str(datetime_end).replace(" ", "T")
-        datetime_end = '"' + datetime_end + ":00" + '"' + "^^xsd:dateTime"
-        self.datetime_start = datetime_start
-        self.datetime_end = datetime_end
-        print(self.datetime_start)
-        print(self.datetime_end)
+        self.datetime_start=datetime_convert(datetime_start)
+        self.datetime_end = datetime_convert(datetime_end)
         self.run_query()
 
     def run_query(self):
@@ -192,15 +186,8 @@ class InterdictionArea():
 
     def __init__(self,vessel, datetime_start, datetime_end):
         self.vessel = str(vessel)
-        datetime_start = str(datetime_start).replace(" ", "T")
-        datetime_start = '"' + datetime_start + ":00" + '"' + "^^xsd:dateTime"
-        datetime_end = str(datetime_end).replace(" ", "T")
-        datetime_end = '"' + datetime_end + ":00" + '"' + "^^xsd:dateTime"
-        self.datetime_start = datetime_start
-        self.datetime_end = datetime_end
-        print(self.datetime_start)
-        print(self.datetime_end)
-        #self.map = pltMap(XMIN, YMIN, XMAX, YMAX)
+        self.datetime_start = datetime_convert(datetime_start)
+        self.datetime_end = datetime_convert(datetime_end)
         self.run_query()
 
     def run_query(self):
@@ -232,10 +219,10 @@ class InterdictionArea():
                 msg = msg.replace("SRID=4322;","")
                 msg = msg.split(" ")
                 try:
-                    self.res += "VESSEL: "+ msg[2]+" TYPE: "+my_dict2[my_dict[msg[1]]]+"\n"+" DATE and TIME: "+msg[3]+" "+msg[4]+" "+msg[5]+" "+msg[6]+ "\n" +"\n"
+                    self.res += "VESSEL: "+ msg[1]+" TYPE: "+my_dict2[my_dict[msg[1]]]+"\n"+" DATE and TIME: "+msg[2]+" "+msg[3]+" "+msg[4]+" "+msg[5]+ " "+msg[6]+"\n" +"\n"
                 except:
-                    self.res += "VESSEL: " + msg[2] + " TYPE: not found" + "\n" + " DATE and TIME: " + \
-                                msg[3] + " " + msg[4] + " " + msg[5] + " " + msg[6] + "\n" + "\n"
+                    self.res += "VESSEL: " + msg[1] + " TYPE: not found" + "\n" + " DATE and TIME: " + \
+                                msg[2] + " " + msg[3] + " " + msg[4] + " " + msg[5] + " "+msg[6]+ "\n" + "\n"
             self.gui_result()
         else:
             showinfo('Warning!', 'Complete all fields! ')
@@ -308,14 +295,8 @@ class InterdictionArea():
 class ProtectedArea():
     def __init__(self,protected_area_code,vessel,event,datetime_start, datetime_end):
         self.protectedArea = str(protected_area_code)
-        datetime_start = str(datetime_start).replace(" ", "T")
-        datetime_start = '"' + datetime_start + ":00" + '"' + "^^xsd:dateTime"
-        datetime_end = str(datetime_end).replace(" ", "T")
-        datetime_end = '"' + datetime_end + ":00" + '"' + "^^xsd:dateTime"
-        self.datetime_start = datetime_start
-        self.datetime_end = datetime_end
-        print(self.datetime_start)
-        print(self.datetime_end)
+        self.datetime_start = datetime_convert(datetime_start)
+        self.datetime_end = datetime_convert(datetime_end)
         self.vessel = str(vessel)
         self.event = str(event)
         self.run_query()
@@ -449,14 +430,8 @@ class TrajectoryAndGap():
     def __init__(self, vessel,datetime_start,datetime_end):
         self.vessel = str(vessel)
         self.map = pltMap(XMIN, YMIN, XMAX, YMAX)
-        datetime_start = str(datetime_start).replace(" ","T")
-        datetime_start = '"'+datetime_start+":00"+'"'+"^^xsd:dateTime"
-        datetime_end = str(datetime_end).replace(" ", "T")
-        datetime_end = '"'+datetime_end + ":00"+'"'+"^^xsd:dateTime"
-        self.datetime_start = datetime_start
-        self.datetime_end = datetime_end
-        print(self.datetime_start)
-        print(self.datetime_end)
+        self.datetime_start = datetime_convert(datetime_start)
+        self.datetime_end = datetime_convert(datetime_end)
         self.run_query()
 
     def run_query(self):
@@ -566,7 +541,12 @@ class TrajectoryAndGap():
         scrollbar = Scrollbar(self.gui, orient=VERTICAL)
         scrollbar.pack(side="right", fill='y')
         text = Text(self.gui, yscrollcommand=scrollbar.set)
-        text.insert("end", self.result)
+        text.insert("end", "TIME INTERVAL: " + self.datetime_start[1:17].replace("T", " ") +
+                    " / " + self.datetime_end[1:17].replace("T", " ") + "\n" + "\n" + self.result)
+
+        text.tag_config("time_interval", foreground="blue")
+        # text.tag_config("prefix", foreground="orange")
+        text_search(text, "TIME INTERVAL:", "time_interval", True)
         text.tag_config("point", foreground="blue")
         # text.tag_config("prefix", foreground="orange")
         text_search(text, "POINT:", "point", True)
@@ -652,3 +632,9 @@ def text_search(text_widget, keyword, tag, flag=False):
         else:
             s = str(idx) + " lineend"
         text_widget.tag_add(tag, idx, s)
+
+def datetime_convert(datetime):
+    datetime = str(datetime).replace(" ", "T")
+    datetime = '"' + datetime + ":00" + '"' + "^^xsd:dateTime"
+    print(datetime)
+    return datetime
