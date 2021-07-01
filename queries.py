@@ -679,7 +679,7 @@ class TrajectoryAndGap():
         # text.tag_config("prefix", foreground="orange")
         text_search(text, "DATE and TIME:", "date_and_time", True)
         text.configure(state=DISABLED)
-        traj = Button(self.gui, text="Back", command=event_button)
+        traj = Button(self.gui, text="Back", bg="darkgray", fg="black",command=event_button)
         traj.pack(fill='x', padx=5, pady=5, side=BOTTOM)
         text.pack(side="left", fill="y")
 
